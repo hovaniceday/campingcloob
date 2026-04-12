@@ -1,0 +1,30 @@
+cat << 'EOF' > index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Camping Club</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="app">
+    
+    <div id="game-container">
+      <canvas id="game"></canvas>
+    </div>
+
+    <div id="sidebar">
+      <h2>🌲 Summer Trips</h2>
+      <ul id="trip-list"></ul>
+    </div>
+
+  </div>
+
+  <button id="menu-button">☰ Trips</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
+EOF

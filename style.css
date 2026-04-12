@@ -1,0 +1,81 @@
+cat << 'EOF' > style.css
+body {
+  margin: 0;
+  font-family: monospace;
+  background: #0f1a13;
+  color: #e8f5e9;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+#game-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  background: #1c2b22;
+}
+
+#sidebar {
+  width: 280px;
+  background: rgba(0,0,0,0.6);
+  padding: 20px;
+  box-sizing: border-box;
+  border-left: 2px solid #2e4a3a;
+}
+
+#trip-list {
+  list-style: none;
+  padding: 0;
+}
+
+#trip-list li {
+  margin: 12px 0;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+#trip-list li:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+#menu-button {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  background: #2e4a3a;
+  color: white;
+  border: none;
+  padding: 10px;
+}
+
+@media (max-width: 768px) {
+  #sidebar {
+    position: fixed;
+    right: -100%;
+    top: 0;
+    height: 100%;
+    transition: right 0.3s ease;
+  }
+
+  #sidebar.open {
+    right: 0;
+  }
+
+  #menu-button {
+    display: block;
+  }
+}
+EOF
