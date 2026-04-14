@@ -6,11 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.width = 320;
   canvas.height = 240;
 
-  const uiLayer = document.getElementById("ui-layer");
-
-  // =========================
-  // IMAGES (LOAD ONCE)
-  // =========================
+  // IMAGES
   const duckImg = new Image();
   duckImg.src = "./assets/duck.png";
 
@@ -29,12 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const willowImg = new Image();
   willowImg.src = "./assets/willow.png";
 
-  const campsiteImg = new Image();
-  campsiteImg.src = "./assets/campsite.png";
-
-  // =========================
   // DESTINATIONS
-  // =========================
   const DESTINATIONS = [
     { name: "Lake Luzerne", url: "https://partiful.com" },
     { name: "Beaverkill", url: "https://partiful.com" }
@@ -52,13 +43,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const sidebarItems = document.querySelectorAll("#trip-list li");
 
-  // =========================
-  // GRID SYSTEM
-  // =========================
+  // GRID
   const GRID = {
     cellWidth: canvas.width / 3,
     cellHeight: canvas.height / 3
   };
+
+  // PLAYER
+  const player = {
+    x: 160,
+    y: 120,
+    size: 24,
+    speed: 2,
+    frame: 0,
+    idleTick: 0
+  };
+
+  // INTERACTIVE OBJECTS
+  const objects = [
+    { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
+    { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 }
+  ];
+
+  // ENVIRONMENT OBJECTS
+  const environment = [
+    { gridX: 1, gridY: 0, img: treeImg, frame: 0, idle: 0 },
+    { gridX: 2, gridY: 2, img: willowImg, frame: 0, idle: 0 }
+  ];
+
+  // BUSHES (random scatter)
+  const bushes = [];
+  for (let i = 0; i < 6; i++) {
+    bushes.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height
+    });
+  }
 
   function getPos(obj) {
     const x = obj.gridX * GRID.cellWidth + GRID.cellWidth / 2;
@@ -76,53 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.hypot(x1 - x2, y1 - y2) < 50;
   }
 
-  // =========================
-  // PLAYER (DUCK)
-  // =========================
-  const player = {
-    x: 0,
-    y: 0,
-    size: 24,
-    speed: 2,
-    frame: 0,
-    idleTick: 0
-  };
-
-  // =========================
-  // WORLD OBJECTS
-  // =========================
-
-  const HOME = { gridX: 1, gridY: 1, img: campsiteImg, label: "home!!!!!!" };
-
-  const objects = [
-    { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
-    { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 }
-  ];
-
-  const environment = [
-    HOME,
-    { gridX: 1, gridY: 0, img: treeImg, frame: 0, idle: 0, label: "tree" },
-    { gridX: 2, gridY: 2, img: willowImg, frame: 0, idle: 0, label: "willow" }
-  ];
-
-  const bushes = [];
-  for (let i = 0; i < 6; i++) {
-    bushes.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height
-    });
-  }
-
-  // =========================
-  // SPAWN PLAYER AT HOME
-  // =========================
-  const homePos = getPos(HOME);
-  player.x = homePos.x;
-  player.y = homePos.y;
-
-  // =========================
   // INPUT
-  // =========================
   const keys = {};
 
   window.addEventListener("keydown", e => keys[e.key] = true);
@@ -137,9 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // =========================
   // MENU
-  // =========================
   const menuBtn = document.getElementById("menu-button");
   const sidebar = document.getElementById("sidebar");
   const backBtn = document.getElementById("back-button");
@@ -147,9 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
   menuBtn.onclick = () => sidebar.classList.toggle("open");
   backBtn.onclick = () => sidebar.classList.remove("open");
 
-  // =========================
-  // UPDATE
-  // =========================
   function update() {
     if (keys["ArrowUp"] || keys["w"] || keys["up"]) player.y -= player.speed;
     if (keys["ArrowDown"] || keys["s"] || keys["down"]) player.y += player.speed;
@@ -165,9 +134,6 @@ document.addEventListener("DOMContentLoaded", () => {
     player.idleTick += 0.05;
   }
 
-  // =========================
-  // SPRITE DRAW
-  // =========================
   function drawSprite(img, frame, x, y, size) {
     const cols = 2;
     const fw = img.width / cols;
@@ -179,33 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.drawImage(img, fx, fy, fw, fh, x, y, size, size);
   }
 
-  // =========================
-  // LABEL SYSTEM (UI LAYER)
-  // =========================
-  function renderLabels() {
-    uiLayer.innerHTML = "";
-
-    environment.forEach(obj => {
-      if (!obj.label) return;
-
-      const pos = getPos(obj);
-
-      const el = document.createElement("div");
-      el.className = "world-label" + (obj === HOME ? " home" : "");
-      el.textContent = obj.label;
-
-      el.style.left = pos.x + "px";
-      el.style.top = pos.y + "px";
-
-      uiLayer.appendChild(el);
-    });
-  }
-
-  // =========================
-  // DRAW
-  // =========================
   function draw() {
-
     ctx.fillStyle = "#b7e07a";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -221,10 +161,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const pos = getPos(obj);
       const near = isNear(player.x, player.y, pos.x, pos.y);
 
-      obj.idle = (obj.idle || 0) + 0.05;
+      obj.idle += 0.05;
       const float = Math.sin(obj.idle) * 2;
 
-      if (near) obj.frame = (obj.frame || 0) + 0.2;
+      if (near) obj.frame = (obj.frame + 0.2) % 4;
       else obj.frame = 0;
 
       drawSprite(obj.img, Math.floor(obj.frame), pos.drawX, pos.drawY + float, 32);
@@ -252,20 +192,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const bounce = Math.sin(player.idleTick) * 2;
     player.frame = (player.frame + 0.15) % 4;
 
-    drawSprite(
-      duckImg,
-      Math.floor(player.frame),
-      player.x,
-      player.y + bounce,
-      player.size
-    );
-
-    renderLabels();
+    drawSprite(duckImg, Math.floor(player.frame), player.x, player.y + bounce, player.size);
   }
 
-  // =========================
-  // CLICK INTERACTION
-  // =========================
   canvas.addEventListener("click", () => {
     objects.forEach(obj => {
       const pos = getPos(obj);
@@ -275,9 +204,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // =========================
-  // LOOP
-  // =========================
   function loop() {
     update();
     draw();

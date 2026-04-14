@@ -128,27 +128,3 @@ canvas {
     display: block;
   }
 }
-
-/* UI LAYER FOR WORLD LABELS */
-#ui-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-/* LABEL STYLE */
-.world-label {
-  position: absolute;
-  font-size: 12px;
-  font-family: monospace;
-  background: rgba(255,255,255,0.75);
-  padding: 2px 4px;
-  border-radius: 3px;
-  transform: translate(-50%, -120%);
-  white-space: nowrap;
-}
-
-/* OPTIONAL: subtle vibe for home */
-.world-label.home {
-  font-weight: bold;
-}
