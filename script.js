@@ -55,15 +55,20 @@ document.addEventListener("DOMContentLoaded", () => {
     { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0 }
   ];
 
-  function getPos(obj) {
-    return {
-      x: obj.gridX * GRID.cellWidth + GRID.cellWidth / 2 - 16,
-      y: obj.gridY * GRID.cellHeight + GRID.cellHeight / 2 - 16
-    };
-  }
+function getPos(obj) {
+  const x = obj.gridX * GRID.cellWidth + GRID.cellWidth / 2;
+  const y = obj.gridY * GRID.cellHeight + GRID.cellHeight / 2;
+
+  return {
+    x,
+    y,
+    drawX: x - 16,
+    drawY: y - 16
+  };
+}
 
   function isNear(x1, y1, x2, y2) {
-    return Math.hypot(x1 - x2, y1 - y2) < 40;
+return Math.hypot(x1 - x2, y1 - y2) < 50;
   }
 
   // ===== INPUT =====
@@ -134,8 +139,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // objects
     objects.forEach(obj => {
-      const pos = getPos(obj);
-      const near = isNear(player.x, player.y, pos.x, pos.y);
+const pos = getPos(obj);
+const near = isNear(player.x, player.y, pos.x, pos.y);
 
       if (near) {
         obj.frame = (obj.frame + 0.1) % 4;
@@ -144,7 +149,13 @@ document.addEventListener("DOMContentLoaded", () => {
         obj.frame = 0;
       }
 
-      drawSprite(obj.img, Math.floor(obj.frame), pos.x, pos.y, 32);
+      if (near) {
+  obj.frame = (obj.frame + 0.2) % 4;
+} else {
+  obj.frame = 0;
+}
+
+drawSprite(obj.img, Math.floor(obj.frame), pos.drawX, pos.drawY, 32);
     });
 
     // duck animation
