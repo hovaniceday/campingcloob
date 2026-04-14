@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.width = 320;
   canvas.height = 240;
 
-  // ===== IMAGES =====
+  // IMAGES
   const duckImg = new Image();
   duckImg.src = "./assets/duck.png";
 
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const boatImg = new Image();
   boatImg.src = "./assets/boat.png";
 
-  // ===== DESTINATIONS =====
+  // DESTINATIONS
   const DESTINATIONS = [
     { name: "Lake Luzerne", url: "https://partiful.com" },
     { name: "Beaverkill", url: "https://partiful.com" }
@@ -24,81 +24,71 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const list = document.getElementById("trip-list");
 
-  DESTINATIONS.forEach((dest, index) => {
+  DESTINATIONS.forEach((dest, i) => {
     const li = document.createElement("li");
     li.textContent = dest.name;
     li.onclick = () => window.open(dest.url, "_blank");
-    li.dataset.index = index;
+    li.dataset.index = i;
     list.appendChild(li);
   });
 
   const sidebarItems = document.querySelectorAll("#trip-list li");
 
-  // ===== GRID =====
+  // GRID
   const GRID = {
     cellWidth: canvas.width / 3,
     cellHeight: canvas.height / 3
   };
 
-  // ===== PLAYER =====
+  // PLAYER
   const player = {
     x: 160,
     y: 120,
     size: 24,
     speed: 2,
-    frame: 0
+    frame: 0,
+    idleTick: 0
   };
 
-  // ===== OBJECTS =====
+  // OBJECTS
   const objects = [
-    { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0 },
-    { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0 }
+    { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
+    { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 }
   ];
 
-function getPos(obj) {
-  const x = obj.gridX * GRID.cellWidth + GRID.cellWidth / 2;
-  const y = obj.gridY * GRID.cellHeight + GRID.cellHeight / 2;
+  function getPos(obj) {
+    const x = obj.gridX * GRID.cellWidth + GRID.cellWidth / 2;
+    const y = obj.gridY * GRID.cellHeight + GRID.cellHeight / 2;
 
-  return {
-    x,
-    y,
-    drawX: x - 16,
-    drawY: y - 16
-  };
-}
-
-  function isNear(x1, y1, x2, y2) {
-return Math.hypot(x1 - x2, y1 - y2) < 50;
+    return {
+      x,
+      y,
+      drawX: x - 16,
+      drawY: y - 16
+    };
   }
 
-  // ===== INPUT =====
+  function isNear(x1, y1, x2, y2) {
+    return Math.hypot(x1 - x2, y1 - y2) < 50;
+  }
+
+  // INPUT
   const keys = {};
 
   window.addEventListener("keydown", e => keys[e.key] = true);
   window.addEventListener("keyup", e => keys[e.key] = false);
 
-  // ===== DPAD TOUCH =====
-  const dpad = document.getElementById("dpad-img");
-
-  dpad.addEventListener("touchstart", (e) => {
-    const rect = dpad.getBoundingClientRect();
-    const x = e.touches[0].clientX - rect.left;
-    const y = e.touches[0].clientY - rect.top;
-
-    const dx = x - rect.width / 2;
-    const dy = y - rect.height / 2;
-
-    keys["up"] = dy < -20;
-    keys["down"] = dy > 20;
-    keys["left"] = dx < -20;
-    keys["right"] = dx > 20;
+  // DPAD
+  document.querySelectorAll("#dpad button").forEach(btn => {
+    btn.addEventListener("touchstart", () => {
+      keys[btn.dataset.dir] = true;
+    });
+    btn.addEventListener("touchend", () => {
+      keys[btn.dataset.dir] = false;
+    });
   });
 
-  dpad.addEventListener("touchend", () => {
-    keys["up"] = keys["down"] = keys["left"] = keys["right"] = false;
-  });
-
-  // ===== MENU =====
+  // MENU
   const menuBtn = document.getElementById("menu-button");
   const sidebar = document.getElementById("sidebar");
   const backBtn = document.getElementById("back-button");
@@ -106,7 +96,6 @@ return Math.hypot(x1 - x2, y1 - y2) < 50;
   menuBtn.onclick = () => sidebar.classList.toggle("open");
   backBtn.onclick = () => sidebar.classList.remove("open");
 
-  // ===== UPDATE =====
   function update() {
     if (keys["ArrowUp"] || keys["w"] || keys["up"]) player.y -= player.speed;
     if (keys["ArrowDown"] || keys["s"] || keys["down"]) player.y += player.speed;
@@ -118,6 +107,8 @@ return Math.hypot(x1 - x2, y1 - y2) < 50;
     if (player.x > canvas.width) player.x = 0;
     if (player.y < 0) player.y = canvas.height;
     if (player.y > canvas.height) player.y = 0;
+
+    player.idleTick += 0.05;
   }
 
   function drawSprite(img, frame, x, y, size) {
@@ -132,35 +123,46 @@ return Math.hypot(x1 - x2, y1 - y2) < 50;
   }
 
   function draw() {
-    ctx.fillStyle = "#1c2b22";
+    ctx.fillStyle = "#b7e07a";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     sidebarItems.forEach(li => li.classList.remove("active"));
 
-    // objects
     objects.forEach(obj => {
-const pos = getPos(obj);
-const near = isNear(player.x, player.y, pos.x, pos.y);
+      const pos = getPos(obj);
+      const near = isNear(player.x, player.y, pos.x, pos.y);
+
+      obj.idle += 0.05;
+      const float = Math.sin(obj.idle) * 2;
 
       if (near) {
-        obj.frame = (obj.frame + 0.1) % 4;
+        obj.frame = (obj.frame + 0.2) % 4;
         sidebarItems[obj.index].classList.add("active");
       } else {
         obj.frame = 0;
       }
 
-      if (near) {
-  obj.frame = (obj.frame + 0.2) % 4;
-} else {
-  obj.frame = 0;
-}
-
-drawSprite(obj.img, Math.floor(obj.frame), pos.drawX, pos.drawY, 32);
+      drawSprite(
+        obj.img,
+        Math.floor(obj.frame),
+        pos.drawX,
+        pos.drawY + float,
+        32
+      );
     });
 
-    // duck animation
+    // duck idle bounce
+    const bounce = Math.sin(player.idleTick) * 2;
+
     player.frame = (player.frame + 0.15) % 4;
-    drawSprite(duckImg, Math.floor(player.frame), player.x, player.y, player.size);
+
+    drawSprite(
+      duckImg,
+      Math.floor(player.frame),
+      player.x,
+      player.y + bounce,
+      player.size
+    );
   }
 
   canvas.addEventListener("click", () => {
