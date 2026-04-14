@@ -12,9 +12,7 @@ body {
 
 #game-container {
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
 }
 
 canvas {
@@ -24,9 +22,10 @@ canvas {
   background: #1c2b22;
 }
 
+/* SIDEBAR */
 #sidebar {
   width: 260px;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.85);
   padding: 20px;
   box-sizing: border-box;
   border-left: 2px solid #2e4a3a;
@@ -42,46 +41,33 @@ canvas {
   cursor: pointer;
   padding: 6px;
   border-radius: 4px;
-  transition: background 0.2s;
-}
-
-#trip-list li:hover {
-  background: rgba(255,255,255,0.1);
 }
 
 #trip-list li.active {
   background: rgba(200,255,120,0.2);
 }
 
-/* Mobile */
+/* BACK BUTTON */
+#back-button {
+  margin-bottom: 20px;
+  background: #2e4a3a;
+  color: white;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+}
 
+/* MOBILE MENU BUTTON */
 #menu-button {
   display: none;
   position: fixed;
   top: 10px;
   left: 10px;
-  z-index: 10;
+  z-index: 20;
   background: #2e4a3a;
   color: white;
   border: none;
   padding: 10px;
-}
-
-@media (max-width: 768px) {
-  #sidebar {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 120px;
-    overflow-y: auto;
-    right: 0;
-    border-left: none;
-    border-top: 2px solid #2e4a3a;
-  }
-
-  #menu-button {
-    display: block;
-  }
 }
 
 /* DPAD */
@@ -89,36 +75,28 @@ canvas {
   position: absolute;
   bottom: 20px;
   right: 20px;
+  width: 120px;
+  height: 120px;
   display: none;
-  grid-template-columns: repeat(3, 40px);
-  grid-template-rows: repeat(3, 40px);
-  gap: 4px;
 }
 
-#dpad button {
-  background: rgba(0,0,0,0.5);
-  color: white;
-  border: none;
-  font-size: 16px;
-  border-radius: 4px;
+#dpad-img {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
 }
 
-#dpad button[data-dir="up"] { grid-column: 2; grid-row: 1; }
-#dpad button[data-dir="left"] { grid-column: 1; grid-row: 2; }
-#dpad button[data-dir="right"] { grid-column: 3; grid-row: 2; }
-#dpad button[data-dir="down"] { grid-column: 2; grid-row: 3; }
-
-/* MOBILE DRAWER */
+/* MOBILE */
 @media (max-width: 768px) {
+
   #sidebar {
     position: fixed;
     top: 0;
     right: -100%;
     width: 100%;
     height: 100%;
-    background: #0f1a13;
     transition: right 0.3s ease;
-    z-index: 20;
+    z-index: 30;
   }
 
   #sidebar.open {
@@ -130,6 +108,6 @@ canvas {
   }
 
   #dpad {
-    display: grid;
+    display: block;
   }
 }
