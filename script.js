@@ -4,28 +4,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const ctx = canvas.getContext("2d");
 
   function resizeCanvas() {
-  const aspect = 4 / 3;
+    const aspect = 4 / 3;
+    const maxWidth = window.innerWidth;
+    const maxHeight = window.innerHeight;
 
-  const maxWidth = window.innerWidth;
-  const maxHeight = window.innerHeight;
+    let width = maxWidth;
+    let height = width / aspect;
 
-  let width = maxWidth;
-  let height = width / aspect;
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * aspect;
+    }
 
-  if (height > maxHeight) {
-    height = maxHeight;
-    width = height * aspect;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
   }
 
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
-}
-
-// initial + button
-resizeCanvas();
-
-document.getElementById("resize-button").onclick = resizeCanvas;
-window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+  document.getElementById("resize-button").onclick = resizeCanvas;
+  window.addEventListener("resize", resizeCanvas);
 
   canvas.width = 320;
   canvas.height = 240;
@@ -60,7 +57,6 @@ window.addEventListener("resize", resizeCanvas);
   ];
 
   const list = document.getElementById("trip-list");
-
   DESTINATIONS.forEach((dest, i) => {
     const li = document.createElement("li");
     li.textContent = dest.name;
@@ -97,20 +93,20 @@ window.addEventListener("resize", resizeCanvas);
     idle: 0
   };
 
-  // PLACES (includes campsite as home)
+  // PLACES
   const places = [
     { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
     { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 },
     { gridX: 1, gridY: 1, img: campImg, index: 2, frame: 0, idle: 0, isHome: true }
   ];
 
-  // ENVIRONMENT (NO FLOAT ANYMORE)
-const environment = [
-  { gridX: 1, gridY: 0, img: treeImg, frame: 0 },
-  { gridX: 2, gridY: 2, img: willowImg, frame: 0 }
-];
+  // ENVIRONMENT
+  const environment = [
+    { gridX: 1, gridY: 0, img: treeImg, frame: 0 },
+    { gridX: 2, gridY: 2, img: willowImg, frame: 0 }
+  ];
 
-  // 🌿 BUSHES (random but balanced)
+  // BUSHES
   const bushes = [];
   for (let i = 0; i < 25; i++) {
     bushes.push({
@@ -152,7 +148,6 @@ const environment = [
     if (keys["ArrowLeft"] || keys["a"] || keys["left"]) player.x -= player.speed;
     if (keys["ArrowRight"] || keys["d"] || keys["right"]) player.x += player.speed;
 
-    // wrap
     if (player.x < 0) player.x = canvas.width;
     if (player.x > canvas.width) player.x = 0;
     if (player.y < 0) player.y = canvas.height;
@@ -178,7 +173,7 @@ const environment = [
 
     sidebarItems.forEach(li => li.classList.remove("active"));
 
-    // 🌿 bushes (soft + varied)
+    // Bushes
     bushes.forEach(b => {
       ctx.globalAlpha = b.alpha;
       ctx.drawImage(bushImg, b.x, b.y, b.size, b.size);
@@ -187,46 +182,30 @@ const environment = [
 
     const drawables = [];
 
-    // 🌳 environment (ONLY reacts when near — no idle float)
-environment.forEach(obj => {
-  const pos = getPos(obj);
-  const near = isNear(player.x, player.y, pos.x, pos.y);
+    // Environment (animate when near, static otherwise)
+    environment.forEach(obj => {
+      const pos = getPos(obj);
+      const near = isNear(player.x, player.y, pos.x, pos.y);
 
-  if (near) {
-    obj.frame = (obj.frame + 0.2) % 4;
-  } else {
-    obj.frame = 0;
-  }
-
-  drawables.push({
-    y: pos.y,
-    draw: () => drawSprite(
-      obj.img,
-      Math.floor(obj.frame),
-      pos.drawX,
-      pos.drawY, // ← NO FLOAT
-      32
-    )
-  });
-});
+      if (near) {
+        obj.frame = (obj.frame + 0.2) % 4;
+      } else {
+        obj.frame = 0;
+      }
 
       drawables.push({
         y: pos.y,
-        draw: () => {
-          const scale = near ? 1.08 : 1;
-          const size = 32 * scale;
-          ctx.drawImage(
-            obj.img,
-            pos.x - size / 2,
-            pos.y - size / 2,
-            size,
-            size
-          );
-        }
+        draw: () => drawSprite(
+          obj.img,
+          Math.floor(obj.frame),
+          pos.drawX,
+          pos.drawY,
+          32
+        )
       });
     });
 
-    // 🎯 places (interactive)
+    // Places (interactive, floating)
     places.forEach(obj => {
       const pos = getPos(obj);
       const near = isNear(player.x, player.y, pos.x, pos.y);
@@ -247,7 +226,7 @@ environment.forEach(obj => {
       });
     });
 
-    // 🦆 duck
+    // Duck (player)
     const bounce = Math.sin(player.idle) * 2;
     player.frame = (player.frame + 0.15) % 4;
 
@@ -256,7 +235,7 @@ environment.forEach(obj => {
       draw: () => drawSprite(duckImg, Math.floor(player.frame), player.x, player.y + bounce, player.size)
     });
 
-    // depth sort
+    // Depth sort and draw
     drawables.sort((a, b) => a.y - b.y);
     drawables.forEach(d => d.draw());
   }
