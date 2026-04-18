@@ -16,6 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const boatImg = new Image();
   boatImg.src = "./assets/boat.png";
 
+  const campImg = new Image();
+  campImg.src = "./assets/campsite.png";
+
   const bushImg = new Image();
   bushImg.src = "./assets/bush.png";
 
@@ -28,7 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // DESTINATIONS
   const DESTINATIONS = [
     { name: "Lake Luzerne", url: "https://partiful.com" },
-    { name: "Beaverkill", url: "https://partiful.com" }
+    { name: "Beaverkill", url: "https://partiful.com" },
+    { name: "Campsite", url: "https://partiful.com" }
   ];
 
   const list = document.getElementById("trip-list");
@@ -43,81 +47,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const sidebarItems = document.querySelectorAll("#trip-list li");
 
-  // GRID
   const GRID = {
     cellWidth: canvas.width / 3,
     cellHeight: canvas.height / 3
   };
 
-  // PLAYER
   const player = {
     x: 160,
     y: 120,
     size: 24,
     speed: 2,
     frame: 0,
-    idleTick: 0
+    idle: 0
   };
 
-  // INTERACTIVE OBJECTS
-  const objects = [
+  // INTERACTIVE (PLACES ONLY)
+  const places = [
     { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
-    { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 }
+    { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 },
+    { gridX: 1, gridY: 1, img: campImg, index: 2, frame: 0, idle: 0 }
   ];
 
-  // ENVIRONMENT OBJECTS
+  // STATIC ENVIRONMENT
   const environment = [
-    { gridX: 1, gridY: 0, img: treeImg, frame: 0, idle: 0 },
-    { gridX: 2, gridY: 2, img: willowImg, frame: 0, idle: 0 }
+    { gridX: 1, gridY: 0, img: treeImg },
+    { gridX: 2, gridY: 2, img: willowImg }
   ];
 
-  // BUSHES (random scatter)
+  // 🌿 SPIRAL BUSHES
   const bushes = [];
-  for (let i = 0; i < 6; i++) {
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  for (let i = 0; i < 40; i++) {
+    const angle = i * 0.5;
+    const radius = 5 + i * 3;
+
     bushes.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height
+      x: centerX + Math.cos(angle) * radius,
+      y: centerY + Math.sin(angle) * radius
     });
   }
 
   function getPos(obj) {
     const x = obj.gridX * GRID.cellWidth + GRID.cellWidth / 2;
     const y = obj.gridY * GRID.cellHeight + GRID.cellHeight / 2;
-
-    return {
-      x,
-      y,
-      drawX: x - 16,
-      drawY: y - 16
-    };
+    return { x, y, drawX: x - 16, drawY: y - 16 };
   }
 
   function isNear(x1, y1, x2, y2) {
     return Math.hypot(x1 - x2, y1 - y2) < 50;
   }
 
-  // INPUT
   const keys = {};
-
   window.addEventListener("keydown", e => keys[e.key] = true);
   window.addEventListener("keyup", e => keys[e.key] = false);
 
   document.querySelectorAll("#dpad button").forEach(btn => {
-    btn.addEventListener("touchstart", () => {
-      keys[btn.dataset.dir] = true;
-    });
-    btn.addEventListener("touchend", () => {
-      keys[btn.dataset.dir] = false;
-    });
+    btn.addEventListener("touchstart", () => keys[btn.dataset.dir] = true);
+    btn.addEventListener("touchend", () => keys[btn.dataset.dir] = false);
   });
 
-  // MENU
+  // MENU TOGGLE (single button)
   const menuBtn = document.getElementById("menu-button");
   const sidebar = document.getElementById("sidebar");
-  const backBtn = document.getElementById("back-button");
 
-  menuBtn.onclick = () => sidebar.classList.toggle("open");
-  backBtn.onclick = () => sidebar.classList.remove("open");
+  menuBtn.onclick = () => {
+    sidebar.classList.toggle("open");
+    menuBtn.textContent = sidebar.classList.contains("open") ? "Back" : "Trips";
+  };
 
   function update() {
     if (keys["ArrowUp"] || keys["w"] || keys["up"]) player.y -= player.speed;
@@ -131,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (player.y < 0) player.y = canvas.height;
     if (player.y > canvas.height) player.y = 0;
 
-    player.idleTick += 0.05;
+    player.idle += 0.05;
   }
 
   function drawSprite(img, frame, x, y, size) {
@@ -152,26 +150,17 @@ document.addEventListener("DOMContentLoaded", () => {
     sidebarItems.forEach(li => li.classList.remove("active"));
 
     // bushes
-    bushes.forEach(b => {
-      ctx.drawImage(bushImg, b.x, b.y, 24, 24);
-    });
+    bushes.forEach(b => ctx.drawImage(bushImg, b.x, b.y, 20, 20));
 
-    // environment
+    // depth sorting list
+    const drawables = [];
+
     environment.forEach(obj => {
       const pos = getPos(obj);
-      const near = isNear(player.x, player.y, pos.x, pos.y);
-
-      obj.idle += 0.05;
-      const float = Math.sin(obj.idle) * 2;
-
-      if (near) obj.frame = (obj.frame + 0.2) % 4;
-      else obj.frame = 0;
-
-      drawSprite(obj.img, Math.floor(obj.frame), pos.drawX, pos.drawY + float, 32);
+      drawables.push({ y: pos.y, draw: () => ctx.drawImage(obj.img, pos.drawX, pos.drawY, 32, 32) });
     });
 
-    // interactive objects
-    objects.forEach(obj => {
+    places.forEach(obj => {
       const pos = getPos(obj);
       const near = isNear(player.x, player.y, pos.x, pos.y);
 
@@ -185,18 +174,28 @@ document.addEventListener("DOMContentLoaded", () => {
         obj.frame = 0;
       }
 
-      drawSprite(obj.img, Math.floor(obj.frame), pos.drawX, pos.drawY + float, 32);
+      drawables.push({
+        y: pos.y,
+        draw: () => drawSprite(obj.img, Math.floor(obj.frame), pos.drawX, pos.drawY + float, 32)
+      });
     });
 
-    // duck
-    const bounce = Math.sin(player.idleTick) * 2;
+    // player
+    const bounce = Math.sin(player.idle) * 2;
     player.frame = (player.frame + 0.15) % 4;
 
-    drawSprite(duckImg, Math.floor(player.frame), player.x, player.y + bounce, player.size);
+    drawables.push({
+      y: player.y,
+      draw: () => drawSprite(duckImg, Math.floor(player.frame), player.x, player.y + bounce, player.size)
+    });
+
+    // SORT BY Y FOR DEPTH
+    drawables.sort((a, b) => a.y - b.y);
+    drawables.forEach(d => d.draw());
   }
 
   canvas.addEventListener("click", () => {
-    objects.forEach(obj => {
+    places.forEach(obj => {
       const pos = getPos(obj);
       if (isNear(player.x, player.y, pos.x, pos.y)) {
         window.open(DESTINATIONS[obj.index].url, "_blank");

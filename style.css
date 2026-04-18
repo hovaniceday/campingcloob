@@ -31,7 +31,7 @@ canvas {
 /* SIDEBAR */
 #sidebar {
   width: 260px;
-  background: rgba(40, 60, 30, 0.85);
+  background: rgba(40, 60, 30, 0.9);
   padding: 20px;
   box-sizing: border-box;
   border-left: 2px solid #2e4a3a;
@@ -53,23 +53,13 @@ canvas {
   background: rgba(120, 200, 80, 0.4);
 }
 
-/* BACK BUTTON (mobile only) */
-#back-button {
-  display: none;
-  margin-bottom: 20px;
-  background: #2e4a3a;
-  color: white;
-  border: none;
-  padding: 8px;
-}
-
 /* MENU BUTTON */
 #menu-button {
   display: none;
   position: fixed;
   top: 10px;
   left: 10px;
-  z-index: 20;
+  z-index: 40;
   background: #2e4a3a;
   color: white;
   border: none;
@@ -122,9 +112,5 @@ canvas {
 
   #dpad {
     display: grid;
-  }
-
-  #back-button {
-    display: block;
   }
 }
