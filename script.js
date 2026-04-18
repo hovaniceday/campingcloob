@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
-  const uiLayer = document.getElementById("ui-layer");
 
   canvas.width = 320;
   canvas.height = 240;
@@ -48,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const sidebarItems = document.querySelectorAll("#trip-list li");
 
+  // GRID
   const GRID = {
     cellWidth: canvas.width / 3,
     cellHeight: canvas.height / 3
@@ -73,30 +73,27 @@ document.addEventListener("DOMContentLoaded", () => {
     idle: 0
   };
 
-  // PLACES (HOME INCLUDED)
+  // PLACES (includes campsite as home)
   const places = [
     { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
     { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 },
-    { gridX: 1, gridY: 1, img: campImg, index: 2, frame: 0, idle: 0, label: "home!!!!!!", isHome: true }
+    { gridX: 1, gridY: 1, img: campImg, index: 2, frame: 0, idle: 0, isHome: true }
   ];
 
+  // ENVIRONMENT (NO FLOAT ANYMORE)
   const environment = [
     { gridX: 1, gridY: 0, img: treeImg },
     { gridX: 2, gridY: 2, img: willowImg }
   ];
 
-  // 🌿 SPIRAL BUSHES
+  // 🌿 BUSHES (random but balanced)
   const bushes = [];
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
-
-  for (let i = 0; i < 40; i++) {
-    const angle = i * 0.5;
-    const radius = 5 + i * 3;
-
+  for (let i = 0; i < 25; i++) {
     bushes.push({
-      x: centerX + Math.cos(angle) * radius,
-      y: centerY + Math.sin(angle) * radius
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: 16 + Math.random() * 10,
+      alpha: 0.6 + Math.random() * 0.3
     });
   }
 
@@ -151,44 +148,43 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.drawImage(img, fx, fy, fw, fh, x, y, size, size);
   }
 
-  function renderLabels() {
-    uiLayer.innerHTML = "";
-
-    places.forEach(obj => {
-      if (!obj.label) return;
-
-      const pos = getPos(obj);
-
-      const el = document.createElement("div");
-      el.className = "world-label";
-      el.textContent = obj.label;
-
-      el.style.left = pos.x + "px";
-      el.style.top = pos.y + "px";
-
-      uiLayer.appendChild(el);
-    });
-  }
-
   function draw() {
     ctx.fillStyle = "#b7e07a";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     sidebarItems.forEach(li => li.classList.remove("active"));
 
-    // bushes
-    bushes.forEach(b => ctx.drawImage(bushImg, b.x, b.y, 20, 20));
+    // 🌿 bushes (soft + varied)
+    bushes.forEach(b => {
+      ctx.globalAlpha = b.alpha;
+      ctx.drawImage(bushImg, b.x, b.y, b.size, b.size);
+    });
+    ctx.globalAlpha = 1;
 
     const drawables = [];
 
+    // 🌳 environment (ONLY reacts when near — no idle float)
     environment.forEach(obj => {
       const pos = getPos(obj);
+      const near = isNear(player.x, player.y, pos.x, pos.y);
+
       drawables.push({
         y: pos.y,
-        draw: () => ctx.drawImage(obj.img, pos.drawX, pos.drawY, 32, 32)
+        draw: () => {
+          const scale = near ? 1.08 : 1;
+          const size = 32 * scale;
+          ctx.drawImage(
+            obj.img,
+            pos.x - size / 2,
+            pos.y - size / 2,
+            size,
+            size
+          );
+        }
       });
     });
 
+    // 🎯 places (interactive)
     places.forEach(obj => {
       const pos = getPos(obj);
       const near = isNear(player.x, player.y, pos.x, pos.y);
@@ -209,6 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    // 🦆 duck
     const bounce = Math.sin(player.idle) * 2;
     player.frame = (player.frame + 0.15) % 4;
 
@@ -217,10 +214,9 @@ document.addEventListener("DOMContentLoaded", () => {
       draw: () => drawSprite(duckImg, Math.floor(player.frame), player.x, player.y + bounce, player.size)
     });
 
+    // depth sort
     drawables.sort((a, b) => a.y - b.y);
     drawables.forEach(d => d.draw());
-
-    renderLabels();
   }
 
   canvas.addEventListener("click", () => {
