@@ -3,6 +3,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
 
+  function resizeCanvas() {
+  const aspect = 4 / 3;
+
+  const maxWidth = window.innerWidth;
+  const maxHeight = window.innerHeight;
+
+  let width = maxWidth;
+  let height = width / aspect;
+
+  if (height > maxHeight) {
+    height = maxHeight;
+    width = height * aspect;
+  }
+
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+}
+
+// initial + button
+resizeCanvas();
+
+document.getElementById("resize-button").onclick = resizeCanvas;
+window.addEventListener("resize", resizeCanvas);
+
   canvas.width = 320;
   canvas.height = 240;
 
@@ -81,10 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   // ENVIRONMENT (NO FLOAT ANYMORE)
-  const environment = [
-    { gridX: 1, gridY: 0, img: treeImg },
-    { gridX: 2, gridY: 2, img: willowImg }
-  ];
+const environment = [
+  { gridX: 1, gridY: 0, img: treeImg, frame: 0 },
+  { gridX: 2, gridY: 2, img: willowImg, frame: 0 }
+];
 
   // 🌿 BUSHES (random but balanced)
   const bushes = [];
@@ -164,9 +188,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const drawables = [];
 
     // 🌳 environment (ONLY reacts when near — no idle float)
-    environment.forEach(obj => {
-      const pos = getPos(obj);
-      const near = isNear(player.x, player.y, pos.x, pos.y);
+environment.forEach(obj => {
+  const pos = getPos(obj);
+  const near = isNear(player.x, player.y, pos.x, pos.y);
+
+  if (near) {
+    obj.frame = (obj.frame + 0.2) % 4;
+  } else {
+    obj.frame = 0;
+  }
+
+  drawables.push({
+    y: pos.y,
+    draw: () => drawSprite(
+      obj.img,
+      Math.floor(obj.frame),
+      pos.drawX,
+      pos.drawY, // ← NO FLOAT
+      32
+    )
+  });
+});
 
       drawables.push({
         y: pos.y,
