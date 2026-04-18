@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
+  const uiLayer = document.getElementById("ui-layer");
 
   canvas.width = 320;
   canvas.height = 240;
@@ -52,23 +53,33 @@ document.addEventListener("DOMContentLoaded", () => {
     cellHeight: canvas.height / 3
   };
 
+  function getPos(obj) {
+    const x = obj.gridX * GRID.cellWidth + GRID.cellWidth / 2;
+    const y = obj.gridY * GRID.cellHeight + GRID.cellHeight / 2;
+    return { x, y, drawX: x - 16, drawY: y - 16 };
+  }
+
+  function isNear(x1, y1, x2, y2) {
+    return Math.hypot(x1 - x2, y1 - y2) < 50;
+  }
+
+  // PLAYER
   const player = {
-    x: 160,
-    y: 120,
+    x: 0,
+    y: 0,
     size: 24,
     speed: 2,
     frame: 0,
     idle: 0
   };
 
-  // INTERACTIVE (PLACES ONLY)
+  // PLACES (HOME INCLUDED)
   const places = [
     { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
     { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 },
-    { gridX: 1, gridY: 1, img: campImg, index: 2, frame: 0, idle: 0 }
+    { gridX: 1, gridY: 1, img: campImg, index: 2, frame: 0, idle: 0, label: "home!!!!!!", isHome: true }
   ];
 
-  // STATIC ENVIRONMENT
   const environment = [
     { gridX: 1, gridY: 0, img: treeImg },
     { gridX: 2, gridY: 2, img: willowImg }
@@ -89,16 +100,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function getPos(obj) {
-    const x = obj.gridX * GRID.cellWidth + GRID.cellWidth / 2;
-    const y = obj.gridY * GRID.cellHeight + GRID.cellHeight / 2;
-    return { x, y, drawX: x - 16, drawY: y - 16 };
-  }
+  // SPAWN AT HOME
+  const home = places.find(p => p.isHome);
+  const homePos = getPos(home);
+  player.x = homePos.x;
+  player.y = homePos.y;
 
-  function isNear(x1, y1, x2, y2) {
-    return Math.hypot(x1 - x2, y1 - y2) < 50;
-  }
-
+  // INPUT
   const keys = {};
   window.addEventListener("keydown", e => keys[e.key] = true);
   window.addEventListener("keyup", e => keys[e.key] = false);
@@ -108,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("touchend", () => keys[btn.dataset.dir] = false);
   });
 
-  // MENU TOGGLE (single button)
+  // MENU
   const menuBtn = document.getElementById("menu-button");
   const sidebar = document.getElementById("sidebar");
 
@@ -143,6 +151,25 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.drawImage(img, fx, fy, fw, fh, x, y, size, size);
   }
 
+  function renderLabels() {
+    uiLayer.innerHTML = "";
+
+    places.forEach(obj => {
+      if (!obj.label) return;
+
+      const pos = getPos(obj);
+
+      const el = document.createElement("div");
+      el.className = "world-label";
+      el.textContent = obj.label;
+
+      el.style.left = pos.x + "px";
+      el.style.top = pos.y + "px";
+
+      uiLayer.appendChild(el);
+    });
+  }
+
   function draw() {
     ctx.fillStyle = "#b7e07a";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -152,12 +179,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // bushes
     bushes.forEach(b => ctx.drawImage(bushImg, b.x, b.y, 20, 20));
 
-    // depth sorting list
     const drawables = [];
 
     environment.forEach(obj => {
       const pos = getPos(obj);
-      drawables.push({ y: pos.y, draw: () => ctx.drawImage(obj.img, pos.drawX, pos.drawY, 32, 32) });
+      drawables.push({
+        y: pos.y,
+        draw: () => ctx.drawImage(obj.img, pos.drawX, pos.drawY, 32, 32)
+      });
     });
 
     places.forEach(obj => {
@@ -180,7 +209,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // player
     const bounce = Math.sin(player.idle) * 2;
     player.frame = (player.frame + 0.15) % 4;
 
@@ -189,9 +217,10 @@ document.addEventListener("DOMContentLoaded", () => {
       draw: () => drawSprite(duckImg, Math.floor(player.frame), player.x, player.y + bounce, player.size)
     });
 
-    // SORT BY Y FOR DEPTH
     drawables.sort((a, b) => a.y - b.y);
     drawables.forEach(d => d.draw());
+
+    renderLabels();
   }
 
   canvas.addEventListener("click", () => {
