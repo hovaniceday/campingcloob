@@ -142,3 +142,19 @@ canvas {
     opacity: 0.8;
   }
 }
+
+/* BACK BUTTON (inside sidebar flow) */
+#back-button {
+  display: block;
+  background: #2e4a3a;
+  color: white;
+  border: none;
+  padding: 8px;
+  margin-bottom: 20px; /* space between button and header */
+}
+
+/* Ensure header sits cleanly below */
+#sidebar h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
