@@ -17,42 +17,36 @@ body {
   justify-content: center;
   align-items: center;
   position: relative;
+
+  height: 100vh;
+  overflow: hidden;
+
+  transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
 canvas {
   width: 100%;
   height: auto;
+  max-height: 100vh;
   aspect-ratio: 4 / 3;
   image-rendering: pixelated;
   background: #b7e07a;
   display: block;
 }
 
-/* UI LABEL LAYER */
-#ui-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.world-label {
-  position: absolute;
-  font-size: 12px;
-  font-family: monospace;
-  background: rgba(255,255,255,0.75);
-  padding: 2px 4px;
-  border-radius: 3px;
-  transform: translate(-50%, -120%);
-  white-space: nowrap;
-}
-
 /* SIDEBAR */
 #sidebar {
   width: 260px;
-  background: rgba(40, 60, 30, 0.9);
+  background: rgba(40, 60, 30, 0.95);
   padding: 20px;
   box-sizing: border-box;
   border-left: 2px solid #2e4a3a;
+  color: white;
+}
+
+#sidebar h2 {
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 #trip-list {
@@ -65,6 +59,7 @@ canvas {
   cursor: pointer;
   padding: 6px;
   border-radius: 4px;
+  color: white;
 }
 
 #trip-list li.active {
@@ -132,23 +127,18 @@ canvas {
     display: grid;
   }
 
-  #resize-button {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 40;
-  background: #2e4a3a;
-  color: white;
-  border: none;
-  padding: 10px;
-}
+  #game-container {
+    height: 100vh;
+  }
 
-/* Make canvas truly fit viewport */
-#game-container {
-  height: 100vh;
-}
+  canvas {
+    max-height: 70vh;
+  }
 
-canvas {
-  max-height: 100vh;
-}
+  /* ✨ DIM + BLUR BACKGROUND WHEN MENU OPEN */
+  #sidebar.open ~ #app #game-container,
+  #sidebar.open ~ #game-container {
+    filter: blur(2px) brightness(0.7);
+    opacity: 0.8;
+  }
 }

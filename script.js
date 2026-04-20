@@ -3,27 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
 
-  function resizeCanvas() {
-    const aspect = 4 / 3;
-    const maxWidth = window.innerWidth;
-    const maxHeight = window.innerHeight;
-
-    let width = maxWidth;
-    let height = width / aspect;
-
-    if (height > maxHeight) {
-      height = maxHeight;
-      width = height * aspect;
-    }
-
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-  }
-
-  resizeCanvas();
-  document.getElementById("resize-button").onclick = resizeCanvas;
-  window.addEventListener("resize", resizeCanvas);
-
   canvas.width = 320;
   canvas.height = 240;
 
@@ -57,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const list = document.getElementById("trip-list");
+
   DESTINATIONS.forEach((dest, i) => {
     const li = document.createElement("li");
     li.textContent = dest.name;
@@ -67,7 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const sidebarItems = document.querySelectorAll("#trip-list li");
 
-  // GRID
   const GRID = {
     cellWidth: canvas.width / 3,
     cellHeight: canvas.height / 3
@@ -83,7 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.hypot(x1 - x2, y1 - y2) < 50;
   }
 
-  // PLAYER
   const player = {
     x: 0,
     y: 0,
@@ -93,20 +71,17 @@ document.addEventListener("DOMContentLoaded", () => {
     idle: 0
   };
 
-  // PLACES
   const places = [
     { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
     { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 },
     { gridX: 1, gridY: 1, img: campImg, index: 2, frame: 0, idle: 0, isHome: true }
   ];
 
-  // ENVIRONMENT
   const environment = [
     { gridX: 1, gridY: 0, img: treeImg, frame: 0 },
     { gridX: 2, gridY: 2, img: willowImg, frame: 0 }
   ];
 
-  // BUSHES
   const bushes = [];
   for (let i = 0; i < 25; i++) {
     bushes.push({
@@ -117,13 +92,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // SPAWN AT HOME
   const home = places.find(p => p.isHome);
   const homePos = getPos(home);
   player.x = homePos.x;
   player.y = homePos.y;
 
-  // INPUT
   const keys = {};
   window.addEventListener("keydown", e => keys[e.key] = true);
   window.addEventListener("keyup", e => keys[e.key] = false);
@@ -133,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("touchend", () => keys[btn.dataset.dir] = false);
   });
 
-  // MENU
   const menuBtn = document.getElementById("menu-button");
   const sidebar = document.getElementById("sidebar");
 
@@ -173,7 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sidebarItems.forEach(li => li.classList.remove("active"));
 
-    // Bushes
     bushes.forEach(b => {
       ctx.globalAlpha = b.alpha;
       ctx.drawImage(bushImg, b.x, b.y, b.size, b.size);
@@ -182,30 +153,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const drawables = [];
 
-    // Environment (animate when near, static otherwise)
+    // 🌳 environment (animate on proximity, no float)
     environment.forEach(obj => {
       const pos = getPos(obj);
       const near = isNear(player.x, player.y, pos.x, pos.y);
 
-      if (near) {
-        obj.frame = (obj.frame + 0.2) % 4;
-      } else {
-        obj.frame = 0;
-      }
+      if (near) obj.frame = (obj.frame + 0.2) % 4;
+      else obj.frame = 0;
 
       drawables.push({
         y: pos.y,
-        draw: () => drawSprite(
-          obj.img,
-          Math.floor(obj.frame),
-          pos.drawX,
-          pos.drawY,
-          32
-        )
+        draw: () => drawSprite(obj.img, Math.floor(obj.frame), pos.drawX, pos.drawY, 32)
       });
     });
 
-    // Places (interactive, floating)
     places.forEach(obj => {
       const pos = getPos(obj);
       const near = isNear(player.x, player.y, pos.x, pos.y);
@@ -226,7 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // Duck (player)
     const bounce = Math.sin(player.idle) * 2;
     player.frame = (player.frame + 0.15) % 4;
 
@@ -235,7 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
       draw: () => drawSprite(duckImg, Math.floor(player.frame), player.x, player.y + bounce, player.size)
     });
 
-    // Depth sort and draw
     drawables.sort((a, b) => a.y - b.y);
     drawables.forEach(d => d.draw());
   }
