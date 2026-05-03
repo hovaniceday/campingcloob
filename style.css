@@ -17,10 +17,8 @@ body {
   justify-content: center;
   align-items: center;
   position: relative;
-
   height: 100vh;
   overflow: hidden;
-
   transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
@@ -44,6 +42,30 @@ canvas {
   color: white;
 }
 
+/* 🌲 TITLE */
+#title {
+  font-size: 20px;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+/* INTRO */
+#intro {
+  margin-bottom: 16px;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+/* COUNTDOWN */
+#countdown {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 6px;
+}
+
 #sidebar h2 {
   margin-top: 10px;
   margin-bottom: 20px;
@@ -64,6 +86,16 @@ canvas {
 
 #trip-list li.active {
   background: rgba(120, 200, 80, 0.4);
+}
+
+/* BACK BUTTON */
+#back-button {
+  display: block;
+  background: #2e4a3a;
+  color: white;
+  border: none;
+  padding: 8px;
+  margin-bottom: 20px;
 }
 
 /* MENU BUTTON */
@@ -127,34 +159,14 @@ canvas {
     display: grid;
   }
 
-  #game-container {
-    height: 100vh;
-  }
-
   canvas {
     max-height: 70vh;
   }
 
-  /* ✨ DIM + BLUR BACKGROUND WHEN MENU OPEN */
+  /* blur background */
   #sidebar.open ~ #app #game-container,
   #sidebar.open ~ #game-container {
     filter: blur(2px) brightness(0.7);
     opacity: 0.8;
   }
-}
-
-/* BACK BUTTON (inside sidebar flow) */
-#back-button {
-  display: block;
-  background: #2e4a3a;
-  color: white;
-  border: none;
-  padding: 8px;
-  margin-bottom: 20px; /* space between button and header */
-}
-
-/* Ensure header sits cleanly below */
-#sidebar h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
 }
