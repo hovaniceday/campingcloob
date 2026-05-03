@@ -1,8 +1,7 @@
 body {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Georgia, serif;
   background: #d6f5a3;
-  color: #1c2b22;
 }
 
 #app {
@@ -17,58 +16,39 @@ body {
   justify-content: center;
   align-items: center;
   position: relative;
-  height: 100vh;
   overflow: hidden;
-  transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
 canvas {
   width: 100%;
-  height: auto;
   max-height: 100vh;
   aspect-ratio: 4 / 3;
   image-rendering: pixelated;
   background: #b7e07a;
-  display: block;
 }
 
 /* SIDEBAR */
 #sidebar {
   width: 260px;
-  background: rgba(40, 60, 30, 0.95);
+  background: rgba(40,60,30,0.95);
+  color: white;
   padding: 20px;
   box-sizing: border-box;
-  border-left: 2px solid #2e4a3a;
-  color: white;
 }
 
-/* 🌲 TITLE */
 #title {
-  font-size: 20px;
-  letter-spacing: 1px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
-/* INTRO */
 #intro {
-  margin-bottom: 16px;
-  line-height: 1.4;
   font-size: 14px;
+  margin-bottom: 16px;
 }
 
-/* COUNTDOWN */
 #countdown {
-  font-size: 16px;
-  font-weight: bold;
   margin-bottom: 20px;
   padding: 10px;
   background: rgba(255,255,255,0.1);
-  border-radius: 6px;
-}
-
-#sidebar h2 {
-  margin-top: 10px;
-  margin-bottom: 20px;
 }
 
 #trip-list {
@@ -77,25 +57,18 @@ canvas {
 }
 
 #trip-list li {
-  margin: 10px 0;
+  margin: 8px 0;
   cursor: pointer;
-  padding: 6px;
-  border-radius: 4px;
-  color: white;
 }
 
 #trip-list li.active {
-  background: rgba(120, 200, 80, 0.4);
+  background: rgba(120,200,80,0.4);
 }
 
 /* BACK BUTTON */
 #back-button {
-  display: block;
-  background: #2e4a3a;
-  color: white;
-  border: none;
-  padding: 8px;
-  margin-bottom: 20px;
+  display: none;
+  margin-bottom: 16px;
 }
 
 /* MENU BUTTON */
@@ -104,11 +77,7 @@ canvas {
   position: fixed;
   top: 10px;
   left: 10px;
-  z-index: 40;
-  background: #2e4a3a;
-  color: white;
-  border: none;
-  padding: 10px;
+  z-index: 50;
 }
 
 /* DPAD */
@@ -117,34 +86,25 @@ canvas {
   bottom: 20px;
   right: 20px;
   display: none;
-  grid-template-columns: repeat(3, 40px);
-  grid-template-rows: repeat(3, 40px);
-  gap: 4px;
+  grid-template-columns: repeat(3,40px);
+  grid-template-rows: repeat(3,40px);
 }
 
 #dpad button {
   background: rgba(0,0,0,0.4);
   color: white;
   border: none;
-  font-size: 16px;
 }
-
-#dpad button[data-dir="up"] { grid-column: 2; grid-row: 1; }
-#dpad button[data-dir="left"] { grid-column: 1; grid-row: 2; }
-#dpad button[data-dir="right"] { grid-column: 3; grid-row: 2; }
-#dpad button[data-dir="down"] { grid-column: 2; grid-row: 3; }
 
 /* MOBILE */
 @media (max-width: 768px) {
-
   #sidebar {
     position: fixed;
-    top: 0;
     right: -100%;
+    top: 0;
     width: 100%;
     height: 100%;
-    transition: right 0.3s ease;
-    z-index: 30;
+    transition: 0.3s;
   }
 
   #sidebar.open {
@@ -159,14 +119,11 @@ canvas {
     display: grid;
   }
 
-  canvas {
-    max-height: 70vh;
+  #back-button {
+    display: block;
   }
 
-  /* blur background */
-  #sidebar.open ~ #app #game-container,
-  #sidebar.open ~ #game-container {
-    filter: blur(2px) brightness(0.7);
-    opacity: 0.8;
+  canvas {
+    max-height: 70vh;
   }
 }

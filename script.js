@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.width = 320;
   canvas.height = 240;
 
-  // ⏳ COUNTDOWN
+  // COUNTDOWN
   const countdownEl = document.getElementById("countdown");
   const launchDate = new Date("May 22, 2026 15:00:00 GMT-0400");
   let isUnlocked = false;
@@ -16,141 +16,148 @@ document.addEventListener("DOMContentLoaded", () => {
     const diff = launchDate - now;
 
     if (diff <= 0) {
-      countdownEl.textContent = "Trips are now open! 🌲";
+      countdownEl.textContent = "Trips are now open!";
       isUnlocked = true;
       return;
     }
 
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const m = Math.floor((diff / (1000 * 60)) % 60);
-    const s = Math.floor((diff / 1000) % 60);
+    const d = Math.floor(diff / (1000*60*60*24));
+    const h = Math.floor((diff / (1000*60*60)) % 24);
+    const m = Math.floor((diff / (1000*60)) % 60);
 
-    countdownEl.textContent =
-      `Trips open in ${d}d ${h}h ${m}m ${s}s`;
+    countdownEl.textContent = `Opens in ${d}d ${h}h ${m}m`;
   }
 
   setInterval(updateCountdown, 1000);
   updateCountdown();
 
   // IMAGES
-  const duckImg = new Image(); duckImg.src = "./assets/duck.png";
-  const troutImg = new Image(); troutImg.src = "./assets/trout.png";
-  const boatImg = new Image(); boatImg.src = "./assets/boat.png";
-  const campImg = new Image(); campImg.src = "./assets/campsite.png";
-  const bushImg = new Image(); bushImg.src = "./assets/bush.png";
-  const treeImg = new Image(); treeImg.src = "./assets/tree.png";
-  const willowImg = new Image(); willowImg.src = "./assets/willow.png";
+  const duck = new Image(); duck.src = "./assets/duck.png";
+  const boat = new Image(); boat.src = "./assets/boat.png";
+  const trout = new Image(); trout.src = "./assets/trout.png";
+  const willow = new Image(); willow.src = "./assets/willow.png";
+  const tree = new Image(); tree.src = "./assets/tree.png";
+  const camp = new Image(); camp.src = "./assets/campsite.png";
+  const bush = new Image(); bush.src = "./assets/bush.png";
 
-  const DESTINATIONS = [
-    { name: "Acadia", url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1978556881#gid=1978556881" },
-    { name: "Beaverkill", url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1591163723#gid=1591163723" },
-    { name: "Adirondacks", url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1346249244#gid=1346249244" },
-    { name: "Campsite", url: "https://calendar.google.com/calendar/u/0?cid=YmIzYjY5ZDk2OGE5MDg3NDUxMjJiOTkxZWQ3ZjRkMzdmY2JkNGJjNWQ5ZWRiNGIwOGI2NjYzYWI3NTJhYzRhNEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t" }
+  const DESTS = [
+    { name: "Acadia", url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1978556881" },
+    { name: "Beaverkill", url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1591163723" },
+    { name: "Adirondacks", url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1346249244" },
+    { name: "Campsite", url: "https://calendar.google.com" }
   ];
 
   const list = document.getElementById("trip-list");
 
-  DESTINATIONS.forEach((dest, i) => {
+  DESTS.forEach((d,i)=>{
     const li = document.createElement("li");
-    li.textContent = dest.name;
+    li.textContent = d.name;
     li.onclick = () => {
       if (!isUnlocked) return;
-      window.open(dest.url, "_blank");
+      window.open(d.url);
     };
     list.appendChild(li);
   });
 
-  const GRID = { cellWidth: canvas.width / 3, cellHeight: canvas.height / 3 };
+  const GRID = 3;
 
-  function getPos(obj) {
-    const x = obj.gridX * GRID.cellWidth + GRID.cellWidth / 2;
-    const y = obj.gridY * GRID.cellHeight + GRID.cellHeight / 2;
-    return { x, y, drawX: x - 16, drawY: y - 16 };
+  function pos(gx,gy){
+    return {
+      x: (gx+0.5)*(canvas.width/GRID),
+      y: (gy+0.5)*(canvas.height/GRID)
+    };
   }
 
-  function isNear(x1, y1, x2, y2) {
-    return Math.hypot(x1 - x2, y1 - y2) < 50;
+  function near(a,b){
+    return Math.hypot(a.x-b.x,a.y-b.y)<50;
   }
 
-  const player = { x: 0, y: 0, size: 24, speed: 2, frame: 0, idle: 0 };
+  const player = { x:160, y:120, f:0 };
 
   const places = [
-    { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
-    { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 },
-    { gridX: 2, gridY: 2, img: willowImg, index: 2, frame: 0, idle: 0 },
-    { gridX: 1, gridY: 1, img: campImg, index: 3, frame: 0, idle: 0 }
+    { gx:2,gy:0,img:boat,i:0,f:0 },
+    { gx:0,gy:2,img:trout,i:1,f:0 },
+    { gx:2,gy:2,img:willow,i:2,f:0 },
+    { gx:1,gy:1,img:camp,i:3,f:0 }
   ];
 
-  const environment = [{ gridX: 1, gridY: 0, img: treeImg, frame: 0 }];
-
-  const bushes = [];
-  for (let i = 0; i < 25; i++) {
-    bushes.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      size: 16 + Math.random() * 10,
-      alpha: 0.6 + Math.random() * 0.3
-    });
-  }
+  const env = [
+    { gx:1,gy:0,img:tree,f:0 }
+  ];
 
   const keys = {};
-  window.addEventListener("keydown", e => keys[e.key] = true);
-  window.addEventListener("keyup", e => keys[e.key] = false);
+  onkeydown=e=>keys[e.key]=1;
+  onkeyup=e=>keys[e.key]=0;
 
-  function update() {
-    if (keys["ArrowUp"]) player.y -= player.speed;
-    if (keys["ArrowDown"]) player.y += player.speed;
-    if (keys["ArrowLeft"]) player.x -= player.speed;
-    if (keys["ArrowRight"]) player.x += player.speed;
-
-    if (player.x < 0) player.x = canvas.width;
-    if (player.x > canvas.width) player.x = 0;
-    if (player.y < 0) player.y = canvas.height;
-    if (player.y > canvas.height) player.y = 0;
-
-    player.idle += 0.05;
+  function sprite(img,f,x,y){
+    const fw=img.width/2,fh=img.height/2;
+    ctx.drawImage(img,(f%2)*fw,Math.floor(f/2)*fh,fw,fh,x-16,y-16,32,32);
   }
 
-  function drawSprite(img, frame, x, y, size) {
-    const cols = 2;
-    const fw = img.width / cols;
-    const fh = img.height / cols;
-    const fx = (frame % cols) * fw;
-    const fy = Math.floor(frame / cols) * fh;
-    ctx.drawImage(img, fx, fy, fw, fh, x, y, size, size);
-  }
+  function draw(){
 
-  function draw() {
-    ctx.fillStyle = "#b7e07a";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle="#b7e07a";
+    ctx.fillRect(0,0,320,240);
 
-    bushes.forEach(b => {
-      ctx.globalAlpha = b.alpha;
-      ctx.drawImage(bushImg, b.x, b.y, b.size, b.size);
-    });
-    ctx.globalAlpha = 1;
+    const drawables=[];
 
-    places.forEach(obj => {
-      const pos = getPos(obj);
-      const near = isNear(player.x, player.y, pos.x, pos.y);
+    env.forEach(o=>{
+      const p=pos(o.gx,o.gy);
+      if(near(player,p)) o.f=(o.f+0.2)%4; else o.f=0;
 
-      obj.idle += 0.05;
-      const float = Math.sin(obj.idle) * 2;
-
-      if (near) obj.frame = (obj.frame + 0.2) % 4;
-      else obj.frame = 0;
-
-      drawSprite(obj.img, Math.floor(obj.frame), pos.drawX, pos.drawY + float, 32);
+      drawables.push({
+        y:p.y,
+        d:()=>sprite(o.img,Math.floor(o.f),p.x,p.y)
+      });
     });
 
-    const bounce = Math.sin(player.idle) * 2;
-    player.frame = (player.frame + 0.15) % 4;
+    places.forEach(o=>{
+      const p=pos(o.gx,o.gy);
+      const n=near(player,p);
 
-    drawSprite(duckImg, Math.floor(player.frame), player.x, player.y + bounce, player.size);
+      if(n) o.f=(o.f+0.2)%4; else o.f=0;
+
+      drawables.push({
+        y:p.y,
+        d:()=>sprite(o.img,Math.floor(o.f),p.x,p.y)
+      });
+    });
+
+    drawables.push({
+      y:player.y,
+      d:()=>sprite(duck,player.f=(player.f+0.1)%4,player.x,player.y)
+    });
+
+    drawables.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
   }
 
-  function loop() {
+  function update(){
+    if(keys.ArrowUp) player.y-=2;
+    if(keys.ArrowDown) player.y+=2;
+    if(keys.ArrowLeft) player.x-=2;
+    if(keys.ArrowRight) player.x+=2;
+
+    player.x=(player.x+320)%320;
+    player.y=(player.y+240)%240;
+  }
+
+  canvas.onclick=()=>{
+    places.forEach(o=>{
+      const p=pos(o.gx,o.gy);
+      if(near(player,p) && isUnlocked){
+        window.open(DESTS[o.i].url);
+      }
+    });
+  };
+
+  const sidebar = document.getElementById("sidebar");
+  const btn = document.getElementById("menu-button");
+  const back = document.getElementById("back-button");
+
+  btn.onclick = () => sidebar.classList.toggle("open");
+  back.onclick = () => sidebar.classList.remove("open");
+
+  function loop(){
     update();
     draw();
     requestAnimationFrame(loop);
