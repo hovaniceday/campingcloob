@@ -28,11 +28,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const willowImg = new Image();
   willowImg.src = "./assets/willow.png";
 
-  // DESTINATIONS
+  // 🌐 DESTINATIONS (UPDATED)
   const DESTINATIONS = [
-    { name: "Lake Luzerne", url: "https://partiful.com" },
-    { name: "Beaverkill", url: "https://partiful.com" },
-    { name: "Campsite", url: "https://partiful.com" }
+    {
+      name: "Acadia",
+      url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1978556881#gid=1978556881"
+    },
+    {
+      name: "Beaverkill",
+      url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1591163723#gid=1591163723"
+    },
+    {
+      name: "Adirondacks",
+      url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1346249244#gid=1346249244"
+    },
+    {
+      name: "Campsite",
+      url: "https://calendar.google.com/calendar/u/0?cid=YmIzYjY5ZDk2OGE5MDg3NDUxMjJiOTkxZWQ3ZjRkMzdmY2JkNGJjNWQ5ZWRiNGIwOGI2NjYzYWI3NTJhYzRhNEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+    }
   ];
 
   const list = document.getElementById("trip-list");
@@ -71,15 +84,17 @@ document.addEventListener("DOMContentLoaded", () => {
     idle: 0
   };
 
+  // 🎯 ALL CLICKABLE PLACES (UPDATED)
   const places = [
-    { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 },
-    { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 },
-    { gridX: 1, gridY: 1, img: campImg, index: 2, frame: 0, idle: 0, isHome: true }
+    { gridX: 2, gridY: 0, img: boatImg, index: 0, frame: 0, idle: 0 }, // Acadia
+    { gridX: 0, gridY: 2, img: troutImg, index: 1, frame: 0, idle: 0 }, // Beaverkill
+    { gridX: 2, gridY: 2, img: willowImg, index: 2, frame: 0, idle: 0 }, // Adirondacks (NEW)
+    { gridX: 1, gridY: 1, img: campImg, index: 3, frame: 0, idle: 0, isHome: true } // Campsite
   ];
 
+  // 🌳 NON-CLICKABLE
   const environment = [
-    { gridX: 1, gridY: 0, img: treeImg, frame: 0 },
-    { gridX: 2, gridY: 2, img: willowImg, frame: 0 }
+    { gridX: 1, gridY: 0, img: treeImg, frame: 0 }
   ];
 
   const bushes = [];
@@ -92,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // spawn at campsite
   const home = places.find(p => p.isHome);
   const homePos = getPos(home);
   player.x = homePos.x;
@@ -153,7 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const drawables = [];
 
-    // 🌳 environment (animate on proximity, no float)
+    // 🌳 tree (still subtle animation on hover)
     environment.forEach(obj => {
       const pos = getPos(obj);
       const near = isNear(player.x, player.y, pos.x, pos.y);
@@ -167,6 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    // 🎯 clickable places
     places.forEach(obj => {
       const pos = getPos(obj);
       const near = isNear(player.x, player.y, pos.x, pos.y);
@@ -187,6 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    // 🦆 player
     const bounce = Math.sin(player.idle) * 2;
     player.frame = (player.frame + 0.15) % 4;
 
