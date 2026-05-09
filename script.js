@@ -3,18 +3,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
 
-  canvas.width = 320;
-  canvas.height = 240;
+  canvas.width = 960;
+  canvas.height = 720;
 
-  // --------------------
+  // -------------------
   // COUNTDOWN
-  // --------------------
+  // -------------------
 
-  const countdownEl = document.getElementById("countdown");
+  const countdownEl =
+    document.getElementById("countdown");
 
-  const launchDate = new Date("May 22, 2026 15:00:00 GMT-0400");
-
-  let isUnlocked = false;
+  const launchDate =
+    new Date("May 22, 2026 15:00:00 GMT-0400");
 
   function updateCountdown() {
 
@@ -23,17 +23,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (diff <= 0) {
 
-      countdownEl.textContent = "Trips are now open!";
-
-      isUnlocked = true;
+      countdownEl.textContent =
+        "Trips are now open!";
 
       return;
 
     }
 
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const m = Math.floor((diff / (1000 * 60)) % 60);
+    const d =
+      Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    const h =
+      Math.floor((diff / (1000 * 60 * 60)) % 24);
+
+    const m =
+      Math.floor((diff / (1000 * 60)) % 60);
 
     countdownEl.textContent =
       `Opens in ${d}d ${h}h ${m}m`;
@@ -44,77 +48,63 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setInterval(updateCountdown, 1000);
 
-  // --------------------
-  // IMAGE LOADING
-  // --------------------
+  // -------------------
+  // IMAGES
+  // -------------------
 
   const images = {};
 
-  function loadImage(name, src) {
+  const imageList = [
 
-    return new Promise(resolve => {
+    ["duck", "./assets/duck.png"],
+    ["trout", "./assets/trout.png"],
+    ["camp", "./assets/campsite.png"],
+    ["puffin", "./assets/puffin.png"],
 
-      const img = new Image();
+    ["highpeak", "./assets/highpeak.png"],
 
-      img.src = src;
+    ["tree", "./assets/tree.png"],
+    ["willow", "./assets/willow.png"],
 
-      img.onload = () => {
+    ["bush", "./assets/bush.png"]
 
-        resolve({
-          name,
-          img
-        });
+  ];
 
-      };
+  Promise.all(
 
-      img.onerror = () => {
+    imageList.map(([name, src]) => {
 
-        console.log("Missing image:", src);
+      return new Promise(resolve => {
 
-        resolve({
-          name,
-          img: null
-        });
+        const img = new Image();
 
-      };
+        img.src = src;
 
-    });
+        img.onload = () => {
 
-  }
+          images[name] = img;
 
-  Promise.allSettled([
+          resolve();
 
-    loadImage("duck", "./assets/duck.png"),
-    loadImage("trout", "./assets/trout.png"),
-    loadImage("camp", "./assets/campsite.png"),
-    loadImage("highpeak", "./assets/highpeak.png"),
-    loadImage("puffin", "./assets/puffin.png"),
+        };
 
-    loadImage("tree", "./assets/tree.png"),
-    loadImage("willow", "./assets/willow.png"),
-    loadImage("boat", "./assets/boat.png"),
+        img.onerror = () => {
 
-    loadImage("bush", "./assets/bush.png")
+          console.log("Missing:", src);
 
-  ]).then(results => {
+          resolve();
 
-    results.forEach(r => {
+        };
 
-      if (r.status === "fulfilled") {
+      });
 
-        images[r.value.name] = r.value.img;
+    })
 
-      }
+  ).then(startGame);
 
-    });
-
-    startGame();
-
-  });
-
-  // --------------------
+  // -------------------
   // GAME
-  // --------------------
+  // -------------------
 
   function startGame() {
 
@@ -144,21 +134,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // SIDEBAR
 
-    const list = document.getElementById("trip-list");
+    const list =
+      document.getElementById("trip-list");
 
     DESTS.forEach((d, i) => {
 
-      const li = document.createElement("li");
+      const li =
+        document.createElement("li");
 
       li.textContent = d.name;
 
-      li.onclick = () => {
-
-        if (!isUnlocked) return;
+      li.addEventListener("click", () => {
 
         window.open(d.url, "_blank");
 
-      };
+      });
 
       list.appendChild(li);
 
@@ -182,9 +172,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    function near(a, b) {
+    function isNear(a, b) {
 
-      return Math.hypot(a.x - b.x, a.y - b.y) < 46;
+      return Math.hypot(
+        a.x - b.x,
+        a.y - b.y
+      ) < 90;
 
     }
 
@@ -192,79 +185,102 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const player = {
 
-      x: 160,
-      y: 120,
+      x: canvas.width / 2,
+      y: canvas.height / 2,
 
       frame: 0,
-      idle: 0
+      idle: 0,
+
+      size: 88
 
     };
 
-    // INTERACTIVE
+    // CLICKABLE PLACES
 
     const places = [
 
       {
         gx: 0,
         gy: 2,
+
         img: images.trout,
+
         index: 0,
+
         frame: 0,
-        hover: 0
+        hover: 0,
+
+        frames: 4
       },
 
       {
         gx: 2,
         gy: 2,
+
         img: images.highpeak,
+
         index: 1,
+
         frame: 0,
-        hover: 0
+        hover: 0,
+
+        frames: 6
       },
 
       {
         gx: 2,
         gy: 0,
+
         img: images.puffin,
+
         index: 2,
+
         frame: 0,
-        hover: 0
+        hover: 0,
+
+        frames: 4
       },
 
       {
         gx: 1,
         gy: 1,
+
         img: images.camp,
+
         index: 3,
+
         frame: 0,
-        hover: 0
+        hover: 0,
+
+        frames: 4
       }
 
     ];
 
-    // SCENIC OBJECTS
+    // SCENERY
 
-    const environment = [
+    const scenery = [
 
       {
         gx: 1,
         gy: 0,
+
         img: images.tree,
-        frame: 0
+
+        frame: 0,
+
+        frames: 4
       },
 
       {
         gx: 1,
         gy: 2,
-        img: images.willow,
-        frame: 0
-      },
 
-      {
-        gx: 0,
-        gy: 0,
-        img: images.boat,
-        frame: 0
+        img: images.willow,
+
+        frame: 0,
+
+        frames: 4
       }
 
     ];
@@ -273,15 +289,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const bushes = [];
 
-    for (let i = 0; i < 34; i++) {
+    for (let i = 0; i < 38; i++) {
 
       bushes.push({
 
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
 
-        size: 16 + Math.random() * 8,
-        alpha: 0.35 + Math.random() * 0.25
+        size: 42 + Math.random() * 12,
+        alpha: 0.12 + Math.random() * 0.1
 
       });
 
@@ -312,11 +328,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       });
 
-    // DRAW HELPERS
+    // DRAWING
 
-    function drawShadow(x, y, width = 14) {
+    function drawShadow(x, y, width = 40) {
 
-      ctx.globalAlpha = 0.18;
+      ctx.globalAlpha = 0.12;
 
       ctx.fillStyle = "black";
 
@@ -324,9 +340,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       ctx.ellipse(
         x,
-        y + 13,
+        y + 34,
         width,
-        5,
+        12,
         0,
         0,
         Math.PI * 2
@@ -338,17 +354,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    function drawSprite(img, frame, x, y, size = 32) {
+    function drawSprite(
+      img,
+      frame,
+      totalFrames,
+      x,
+      y,
+      size = 88
+    ) {
 
       if (!img) return;
 
       const cols = 2;
 
-      const fw = img.width / cols;
-      const fh = img.height / cols;
+      const rows =
+        Math.ceil(totalFrames / cols);
 
-      const fx = (frame % cols) * fw;
-      const fy = Math.floor(frame / cols) * fh;
+      const fw =
+        img.width / cols;
+
+      const fh =
+        img.height / rows;
+
+      const fx =
+        (frame % cols) * fw;
+
+      const fy =
+        Math.floor(frame / cols) * fh;
 
       ctx.drawImage(
 
@@ -375,26 +407,34 @@ document.addEventListener("DOMContentLoaded", () => {
     function update() {
 
       if (keys["ArrowUp"] || keys["up"]) {
-        player.y -= 2;
+        player.y -= 4;
       }
 
       if (keys["ArrowDown"] || keys["down"]) {
-        player.y += 2;
+        player.y += 4;
       }
 
       if (keys["ArrowLeft"] || keys["left"]) {
-        player.x -= 2;
+        player.x -= 4;
       }
 
       if (keys["ArrowRight"] || keys["right"]) {
-        player.x += 2;
+        player.x += 4;
       }
 
-      player.x =
-        (player.x + canvas.width) % canvas.width;
+      // WRAP
 
-      player.y =
-        (player.y + canvas.height) % canvas.height;
+      if (player.x < 0)
+        player.x = canvas.width;
+
+      if (player.x > canvas.width)
+        player.x = 0;
+
+      if (player.y < 0)
+        player.y = canvas.height;
+
+      if (player.y > canvas.height)
+        player.y = 0;
 
       player.idle += 0.08;
 
@@ -413,7 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
         canvas.height
       );
 
-      // bushes
+      // BUSHES
 
       bushes.forEach(b => {
 
@@ -422,6 +462,7 @@ document.addEventListener("DOMContentLoaded", () => {
         drawSprite(
           images.bush,
           0,
+          1,
           b.x,
           b.y,
           b.size
@@ -431,23 +472,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
       ctx.globalAlpha = 1;
 
+      // RESET SIDEBAR
+
       sidebarItems.forEach(li => {
         li.classList.remove("active");
       });
 
       const drawables = [];
 
-      // ENVIRONMENT
+      // SCENERY
 
-      environment.forEach(obj => {
+      scenery.forEach(obj => {
 
         const pos =
           gridPos(obj.gx, obj.gy);
 
-        if (near(player, pos)) {
+        if (isNear(player, pos)) {
 
           obj.frame =
-            (obj.frame + 0.12) % 4;
+            (obj.frame + 0.12) % obj.frames;
 
         } else {
 
@@ -461,11 +504,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
           draw: () => {
 
-            drawShadow(pos.x, pos.y);
-
             drawSprite(
               obj.img,
               Math.floor(obj.frame),
+              obj.frames,
               pos.x,
               pos.y
             );
@@ -484,17 +526,17 @@ document.addEventListener("DOMContentLoaded", () => {
           gridPos(obj.gx, obj.gy);
 
         const touching =
-          near(player, pos);
+          isNear(player, pos);
 
         obj.hover += 0.05;
 
         const float =
-          Math.sin(obj.hover) * 2;
+          Math.sin(obj.hover) * 4;
 
         if (touching) {
 
           obj.frame =
-            (obj.frame + 0.18) % 4;
+            (obj.frame + 0.16) % obj.frames;
 
           sidebarItems[obj.index]
             .classList.add("active");
@@ -519,8 +561,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
               Math.floor(obj.frame),
 
+              obj.frames,
+
               pos.x,
-              pos.y + float
+              pos.y + float,
+
+              92
 
             );
 
@@ -533,10 +579,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // PLAYER
 
       const bounce =
-        Math.sin(player.idle) * 2;
+        Math.sin(player.idle) * 3;
 
       player.frame =
-        (player.frame + 0.12) % 4;
+        (player.frame + 0.18) % 4;
 
       drawables.push({
 
@@ -547,7 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
           drawShadow(
             player.x,
             player.y,
-            10
+            26
           );
 
           drawSprite(
@@ -556,8 +602,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             Math.floor(player.frame),
 
+            4,
+
             player.x,
-            player.y + bounce
+            player.y + bounce,
+
+            player.size
 
           );
 
@@ -565,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       });
 
-      // DEPTH SORT
+      // SORT
 
       drawables.sort((a, b) => a.y - b.y);
 
@@ -573,18 +623,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    // CLICK
+    // CLICK INTERACTION
 
-    canvas.addEventListener("click", () => {
-
-      if (!isUnlocked) return;
+    function activateNearbyLink() {
 
       places.forEach(obj => {
 
         const pos =
           gridPos(obj.gx, obj.gy);
 
-        if (near(player, pos)) {
+        if (isNear(player, pos)) {
 
           window.open(
             DESTS[obj.index].url,
@@ -595,9 +643,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
       });
 
+    }
+
+    canvas.addEventListener(
+      "click",
+      activateNearbyLink
+    );
+
+    window.addEventListener("keydown", e => {
+
+      if (e.key === "Enter") {
+
+        activateNearbyLink();
+
+      }
+
     });
 
-    // MENU
+    // MOBILE MENU
 
     const sidebar =
       document.getElementById("sidebar");
@@ -609,11 +672,15 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("back-button");
 
     menuBtn.onclick = () => {
+
       sidebar.classList.toggle("open");
+
     };
 
     backBtn.onclick = () => {
+
       sidebar.classList.remove("open");
+
     };
 
     // LOOP
