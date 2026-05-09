@@ -14,7 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
     tree: "./assets/tree.png",
     willow: "./assets/willow.png",
     bush: "./assets/bush.png",
-    cat: "./assets/cat.png"
+    cat: "./assets/cat.png",
+    firefly: "./assets/firefly.png"
   };
 
   const images = {};
@@ -43,6 +44,12 @@ document.addEventListener("DOMContentLoaded", () => {
   ).then(startGame);
 
   function startGame() {
+    let isUnlocked = false;
+
+    function isMobileViewport() {
+      return window.matchMedia("(max-width: 900px)").matches;
+    }
+
     const places = [
       {
         name: "Beaverkill",
@@ -54,7 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
         offsetY: 6,
         frame: 0,
         frameSpeed: 0.16,
-        size: 92
+        size: 92,
+        hint: "tap ● to see the trip!"
       },
       {
         name: "Adirondacks",
@@ -66,7 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
         offsetY: -14,
         frame: 0,
         frameSpeed: 0.16,
-        size: 96
+        size: 96,
+        hint: "tap ● to see the trip!"
       },
       {
         name: "Acadia",
@@ -78,7 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
         offsetY: 8,
         frame: 0,
         frameSpeed: 0.16,
-        size: 104
+        size: 104,
+        hint: "tap ● to see the trip!"
       },
       {
         name: "Basecamp",
@@ -91,7 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
         frame: 0,
         frameSpeed: 0.16,
         size: 92,
-        icon: "calendar"
+        icon: "calendar",
+        hint: "check out the cloob cal"
       }
     ];
 
@@ -139,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       li.addEventListener("click", () => {
-        window.location.href = place.url;
+        openPlace(place);
       });
 
       place.sidebarElement = li;
@@ -147,68 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const countdown = document.getElementById("countdown");
-
-    function updateCountdown() {
-      const target = new Date("2026-05-22T15:00:00-04:00");
-      const now = new Date();
-      const diff = target - now;
-
-      if (diff <= 0) {
-        countdown.textContent = "Trips are open!";
-        return;
-      }
-
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const mins = Math.floor((diff / (1000 * 60)) % 60);
-
-      countdown.textContent = `Opens in ${days}d ${hours}h ${mins}m`;
-    }
-
-    updateCountdown();
-    setInterval(updateCountdown, 60000);
-
-    function getGridPos(gridX, gridY, offsetX = 0, offsetY = 0) {
-      const cellWidth = canvas.width / 3;
-      const cellHeight = canvas.height / 3;
-
-      return {
-        x: gridX * cellWidth + cellWidth / 2 + offsetX,
-        y: gridY * cellHeight + cellHeight / 2 + offsetY
-      };
-    }
-
-    const player = {
-      x: canvas.width / 2,
-      y: canvas.height / 2,
-      size: 72,
-      speed: 4,
-      frame: 0,
-      idle: 0
-    };
-
-    const cat = {
-      x: canvas.width * 0.72,
-      y: canvas.height * 0.42,
-      size: 58,
-      frame: 0,
-      speed: 2.4,
-      wanderAngle: Math.random() * Math.PI * 2,
-      wanderTimer: 0,
-      hiddenUntil: 0,
-      isMoving: true,
-      isRunning: false
-    };
-
     const catToast = document.getElementById("cat-toast");
     let toastTimeout = null;
     let mobileHintTarget = null;
 
-    function isMobileViewport() {
-      return window.matchMedia("(max-width: 900px)").matches;
-    }
-
-    function showToast(message, duration = 1200) {
+    function showToast(message, duration = 1400) {
       catToast.textContent = message;
       catToast.classList.add("show");
 
@@ -236,6 +190,95 @@ document.addEventListener("DOMContentLoaded", () => {
       mobileHintTarget = null;
     }
 
+    function updateCountdown() {
+      const target = new Date("2026-05-22T15:00:00-04:00");
+      const now = new Date();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        countdown.textContent = "Trips are open!";
+        isUnlocked = true;
+        return;
+      }
+
+      isUnlocked = false;
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / (1000 * 60)) % 60);
+
+      countdown.textContent = `Opens in ${days}d ${hours}h ${mins}m`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 60000);
+
+    function getGridPos(gridX, gridY, offsetX = 0, offsetY = 0) {
+      const cellWidth = canvas.width / 3;
+      const cellHeight = canvas.height / 3;
+
+      return {
+        x: gridX * cellWidth + cellWidth / 2 + offsetX,
+        y: gridY * cellHeight + cellHeight / 2 + offsetY
+      };
+    }
+
+    function isNear(x1, y1, x2, y2, distance = 96) {
+      return Math.hypot(x1 - x2, y1 - y2) < distance;
+    }
+
+    function randomPlayerSpawn() {
+      let x = canvas.width / 2;
+      let y = canvas.height / 2;
+      let attempts = 0;
+
+      while (attempts < 200) {
+        x = 80 + Math.random() * (canvas.width - 160);
+        y = 80 + Math.random() * (canvas.height - 160);
+
+        const tooCloseToLink = places.some(place => {
+          const pos = getGridPos(place.gridX, place.gridY, place.offsetX, place.offsetY);
+          return isNear(x, y, pos.x, pos.y, 150);
+        });
+
+        if (!tooCloseToLink) {
+          return { x, y };
+        }
+
+        attempts += 1;
+      }
+
+      return { x: 80, y: canvas.height / 2 };
+    }
+
+    const spawn = randomPlayerSpawn();
+
+    const player = {
+      x: spawn.x,
+      y: spawn.y,
+      size: 72,
+      speed: 4,
+      frame: 0,
+      idle: 0
+    };
+
+    const cat = {
+      x: canvas.width * 0.72,
+      y: canvas.height * 0.42,
+      size: 58,
+      frame: 0,
+      speed: 2.4,
+      wanderAngle: Math.random() * Math.PI * 2,
+      wanderTimer: 0,
+      hiddenUntil: 0,
+      isMoving: true,
+      isRunning: false
+    };
+
+    window.setTimeout(() => {
+      showToast("explore quack quack!", 1800);
+    }, 500);
+
     function respawnCat() {
       cat.x = 80 + Math.random() * (canvas.width - 160);
       cat.y = 80 + Math.random() * (canvas.height - 160);
@@ -255,6 +298,25 @@ document.addEventListener("DOMContentLoaded", () => {
         size: 32 + Math.random() * 10,
         alpha: 0.32 + Math.random() * 0.1
       });
+    }
+
+    const fireflies = [];
+    const fireflyCount = isMobileViewport() ? 8 : 16;
+
+    if (images.firefly) {
+      for (let i = 0; i < fireflyCount; i++) {
+        fireflies.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          baseX: Math.random() * canvas.width,
+          baseY: Math.random() * canvas.height,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.006 + Math.random() * 0.006,
+          drift: 18 + Math.random() * 34,
+          size: 12 + Math.random() * 8,
+          alpha: 0.25 + Math.random() * 0.35
+        });
+      }
     }
 
     const keys = {};
@@ -325,10 +387,6 @@ document.addEventListener("DOMContentLoaded", () => {
       sidebar.classList.toggle("open");
       menuButton.textContent = sidebar.classList.contains("open") ? "Back" : "Trips";
     });
-
-    function isNear(x1, y1, x2, y2, distance = 96) {
-      return Math.hypot(x1 - x2, y1 - y2) < distance;
-    }
 
     function drawShadow(x, y, width = 34) {
       ctx.save();
@@ -469,9 +527,31 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    function updateFireflies() {
+      if (!images.firefly) return;
+
+      const now = performance.now();
+
+      fireflies.forEach(fly => {
+        fly.phase += fly.speed;
+
+        fly.x = fly.baseX + Math.sin(now * fly.speed + fly.phase) * fly.drift;
+        fly.y = fly.baseY + Math.cos(now * fly.speed * 0.8 + fly.phase) * (fly.drift * 0.6);
+
+        fly.baseX += Math.sin(fly.phase) * 0.08;
+        fly.baseY += Math.cos(fly.phase * 0.9) * 0.06;
+
+        if (fly.baseX < -20) fly.baseX = canvas.width + 20;
+        if (fly.baseX > canvas.width + 20) fly.baseX = -20;
+        if (fly.baseY < -20) fly.baseY = canvas.height + 20;
+        if (fly.baseY > canvas.height + 20) fly.baseY = -20;
+      });
+    }
+
     function update() {
       updatePlayer();
       updateCat();
+      updateFireflies();
     }
 
     function draw() {
@@ -487,6 +567,25 @@ document.addEventListener("DOMContentLoaded", () => {
             bush.y - bush.size / 2,
             bush.size,
             bush.size
+          );
+          ctx.restore();
+        });
+      }
+
+      if (images.firefly) {
+        const now = performance.now();
+
+        fireflies.forEach(fly => {
+          const pulse = 0.55 + Math.sin(now * 0.004 + fly.phase) * 0.35;
+
+          ctx.save();
+          ctx.globalAlpha = fly.alpha * pulse;
+          ctx.drawImage(
+            images.firefly,
+            fly.x - fly.size / 2,
+            fly.y - fly.size / 2,
+            fly.size,
+            fly.size
           );
           ctx.restore();
         });
@@ -528,7 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
           nearSomething = true;
           place.frame = (place.frame + place.frameSpeed) % 4;
           place.sidebarElement.classList.add("active");
-          maybeShowMobileHint(`place-${place.name}`, "tap ● to see the trip!");
+          maybeShowMobileHint(`place-${place.name}`, place.hint);
         } else {
           place.frame = 0;
         }
@@ -572,12 +671,21 @@ document.addEventListener("DOMContentLoaded", () => {
       drawables.forEach(item => item.draw());
     }
 
+    function openPlace(place) {
+      if (!isUnlocked) {
+        showToast("signups open may 22 at 3pm ET!", 1600);
+        return;
+      }
+
+      window.location.href = place.url;
+    }
+
     function activateNearbyPlace() {
       for (const place of places) {
         const pos = getGridPos(place.gridX, place.gridY, place.offsetX, place.offsetY);
 
         if (isNear(player.x, player.y, pos.x, pos.y)) {
-          window.location.href = place.url;
+          openPlace(place);
           return;
         }
       }

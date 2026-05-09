@@ -65,6 +65,26 @@ canvas {
   color: rgba(255, 255, 255, 0.94);
 }
 
+.instructions {
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.instructions h3 {
+  margin: 0 0 6px 0;
+  font-family: "Cinzel", serif;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.instructions p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.92);
+}
+
 #countdown {
   margin-top: 20px;
   margin-bottom: 24px;
@@ -107,7 +127,6 @@ canvas {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* Higher contrast active trip state */
 #trip-list li.active {
   color: #f3ffd7;
   background: rgba(202, 255, 126, 0.24);
