@@ -96,26 +96,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     const scenery = [
-      {
-        img: images.tree,
-        gridX: 1,
-        gridY: 0,
-        offsetX: -34,
-        offsetY: 8,
-        frame: 0,
-        frameSpeed: 0.1,
-        size: 88
-      },
-      {
-        img: images.willow,
-        gridX: 1,
-        gridY: 2,
-        offsetX: -22,
-        offsetY: -18,
-        frame: 0,
-        frameSpeed: 0.1,
-        size: 88
-      }
+      // fixed hedge / grove shapes — intentional, not random
+      { img: images.tree, gridX: 1, gridY: 0, offsetX: -34, offsetY: 8, frame: 0, frameSpeed: 0.1, size: 88 },
+      { img: images.tree, gridX: 1, gridY: 0, offsetX: -90, offsetY: -4, frame: 0, frameSpeed: 0.1, size: 72 },
+      { img: images.tree, gridX: 1, gridY: 2, offsetX: -28, offsetY: -18, frame: 0, frameSpeed: 0.1, size: 88 },
+
+      { img: images.willow, gridX: 2, gridY: 0, offsetX: -84, offsetY: -22, frame: 0, frameSpeed: 0.1, size: 72 },
+      { img: images.willow, gridX: 2, gridY: 0, offsetX: -28, offsetY: -8, frame: 0, frameSpeed: 0.1, size: 72 },
+      { img: images.willow, gridX: 2, gridY: 1, offsetX: -76, offsetY: 34, frame: 0, frameSpeed: 0.1, size: 70 },
+      { img: images.willow, gridX: 0, gridY: 1, offsetX: 64, offsetY: -24, frame: 0, frameSpeed: 0.1, size: 68 }
     ];
 
     const tripList = document.getElementById("trip-list");
@@ -201,13 +190,19 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const catToast = document.getElementById("cat-toast");
+    let toastTimeout = null;
 
-    function showCatToast() {
+    function showToast(message, duration = 1200) {
+      catToast.textContent = message;
       catToast.classList.add("show");
 
-      window.setTimeout(() => {
+      if (toastTimeout) {
+        window.clearTimeout(toastTimeout);
+      }
+
+      toastTimeout = window.setTimeout(() => {
         catToast.classList.remove("show");
-      }, 1200);
+      }, duration);
     }
 
     function respawnCat() {
@@ -219,15 +214,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const bushes = [];
-    const bushCount = 34;
+    const bushCount = 28;
     const bushPadding = 28;
 
     for (let i = 0; i < bushCount; i++) {
       bushes.push({
         x: bushPadding + Math.random() * (canvas.width - bushPadding * 2),
         y: bushPadding + Math.random() * (canvas.height - bushPadding * 2),
-        size: 34 + Math.random() * 10,
-        alpha: 0.34 + Math.random() * 0.12
+        size: 32 + Math.random() * 10,
+        alpha: 0.32 + Math.random() * 0.1
       });
     }
 
@@ -242,28 +237,53 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.querySelectorAll("#dpad button").forEach(btn => {
+      const dir = btn.dataset.dir;
+      const action = btn.dataset.action;
+
       btn.addEventListener("touchstart", e => {
         e.preventDefault();
-        keys[btn.dataset.dir] = true;
+
+        if (dir) {
+          keys[dir] = true;
+        }
+
+        if (action === "select") {
+          activateNearbyPlace();
+        }
       });
 
       btn.addEventListener("touchend", e => {
         e.preventDefault();
-        keys[btn.dataset.dir] = false;
+
+        if (dir) {
+          keys[dir] = false;
+        }
       });
 
       btn.addEventListener("mousedown", e => {
         e.preventDefault();
-        keys[btn.dataset.dir] = true;
+
+        if (dir) {
+          keys[dir] = true;
+        }
+
+        if (action === "select") {
+          activateNearbyPlace();
+        }
       });
 
       btn.addEventListener("mouseup", e => {
         e.preventDefault();
-        keys[btn.dataset.dir] = false;
+
+        if (dir) {
+          keys[dir] = false;
+        }
       });
 
       btn.addEventListener("mouseleave", () => {
-        keys[btn.dataset.dir] = false;
+        if (dir) {
+          keys[dir] = false;
+        }
       });
     });
 
@@ -362,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const distance = Math.hypot(dx, dy);
 
       if (distance < 38) {
-        showCatToast();
+        showToast("yay!!!!", 1200);
         cat.hiddenUntil = now + 1400;
         cat.isMoving = false;
         cat.isRunning = false;
@@ -446,6 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const drawables = [];
+      const now = performance.now();
 
       scenery.forEach(item => {
         const pos = getGridPos(item.gridX, item.gridY, item.offsetX, item.offsetY);
@@ -470,8 +491,20 @@ document.addEventListener("DOMContentLoaded", () => {
         if (touching) {
           place.frame = (place.frame + place.frameSpeed) % 4;
           place.sidebarElement.classList.add("active");
+
+          if (!place.touchStart) {
+            place.touchStart = now;
+            place.lingerShown = false;
+          }
+
+          if (!place.lingerShown && now - place.touchStart > 1200) {
+            showToast("click it to see the trip!", 1500);
+            place.lingerShown = true;
+          }
         } else {
           place.frame = 0;
+          place.touchStart = null;
+          place.lingerShown = false;
         }
 
         const float = Math.sin(place.hover) * 3;
@@ -518,6 +551,8 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
       }
+
+      showToast("nothing here yet!", 900);
     }
 
     canvas.addEventListener("click", activateNearbyPlace);

@@ -116,7 +116,7 @@ canvas {
   flex: 0 0 auto;
 }
 
-/* CAT TOAST */
+/* TOAST */
 
 #cat-toast {
   position: absolute;
@@ -133,6 +133,7 @@ canvas {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
 }
 
 #cat-toast.show {
@@ -177,15 +178,23 @@ canvas {
   color: white;
   font-size: 22px;
   backdrop-filter: blur(4px);
+  cursor: pointer;
 }
 
 #dpad button[data-dir="up"] {
   grid-column: 2;
+  grid-row: 1;
 }
 
 #dpad button[data-dir="left"] {
   grid-column: 1;
   grid-row: 2;
+}
+
+#select-button {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 14px;
 }
 
 #dpad button[data-dir="right"] {
