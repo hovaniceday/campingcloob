@@ -96,15 +96,26 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     const scenery = [
-      // fixed hedge / grove shapes — intentional, not random
-      { img: images.tree, gridX: 1, gridY: 0, offsetX: -34, offsetY: 8, frame: 0, frameSpeed: 0.1, size: 88 },
-      { img: images.tree, gridX: 1, gridY: 0, offsetX: -90, offsetY: -4, frame: 0, frameSpeed: 0.1, size: 72 },
-      { img: images.tree, gridX: 1, gridY: 2, offsetX: -28, offsetY: -18, frame: 0, frameSpeed: 0.1, size: 88 },
-
-      { img: images.willow, gridX: 2, gridY: 0, offsetX: -84, offsetY: -22, frame: 0, frameSpeed: 0.1, size: 72 },
-      { img: images.willow, gridX: 2, gridY: 0, offsetX: -28, offsetY: -8, frame: 0, frameSpeed: 0.1, size: 72 },
-      { img: images.willow, gridX: 2, gridY: 1, offsetX: -76, offsetY: 34, frame: 0, frameSpeed: 0.1, size: 70 },
-      { img: images.willow, gridX: 0, gridY: 1, offsetX: 64, offsetY: -24, frame: 0, frameSpeed: 0.1, size: 68 }
+      {
+        img: images.tree,
+        gridX: 1,
+        gridY: 0,
+        offsetX: -34,
+        offsetY: 8,
+        frame: 0,
+        frameSpeed: 0.1,
+        size: 88
+      },
+      {
+        img: images.willow,
+        gridX: 1,
+        gridY: 2,
+        offsetX: -22,
+        offsetY: -18,
+        frame: 0,
+        frameSpeed: 0.1,
+        size: 88
+      }
     ];
 
     const tripList = document.getElementById("trip-list");
@@ -466,7 +477,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const drawables = [];
-      const now = performance.now();
 
       scenery.forEach(item => {
         const pos = getGridPos(item.gridX, item.gridY, item.offsetX, item.offsetY);
@@ -491,20 +501,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (touching) {
           place.frame = (place.frame + place.frameSpeed) % 4;
           place.sidebarElement.classList.add("active");
-
-          if (!place.touchStart) {
-            place.touchStart = now;
-            place.lingerShown = false;
-          }
-
-          if (!place.lingerShown && now - place.touchStart > 1200) {
-            showToast("click it to see the trip!", 1500);
-            place.lingerShown = true;
-          }
         } else {
           place.frame = 0;
-          place.touchStart = null;
-          place.lingerShown = false;
         }
 
         const float = Math.sin(place.hover) * 3;
@@ -551,8 +549,6 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
       }
-
-      showToast("nothing here yet!", 900);
     }
 
     canvas.addEventListener("click", activateNearbyPlace);
