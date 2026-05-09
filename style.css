@@ -1,343 +1,267 @@
-body {
+* {
+  box-sizing: border-box;
+}
 
+body {
   margin: 0;
   overflow: hidden;
 
-  background: #d6f5a3;
+  background: #c7e89a;
+  color: white;
 
-  font-family: 'IBM Plex Sans', sans-serif;
-
+  font-family: "Inter", sans-serif;
 }
 
 #app {
-
   display: flex;
-
-  height: 100vh;
   width: 100vw;
-
-  overflow: hidden;
-
+  height: 100vh;
 }
 
 /* GAME AREA */
 
 #game-container {
-
   flex: 1;
 
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   position: relative;
 
   overflow: hidden;
-
-  padding: 18px;
-
-  box-sizing: border-box;
-
 }
 
 canvas {
-
-  image-rendering: pixelated;
-
-  background: #b7e07a;
-
-  border-radius: 6px;
-
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,0.04);
-
-  width: min(100%, 1100px);
-
+  width: min(1000px, 72vw);
   height: auto;
 
   aspect-ratio: 4 / 3;
 
-  display: block;
+  background: #c7e89a;
 
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+
+  display: block;
 }
 
 /* SIDEBAR */
 
 #sidebar {
+  width: 320px;
 
-  width: 340px;
-  min-width: 340px;
+  padding: 28px;
 
-  height: 100vh;
+  background: rgba(24, 52, 18, 0.96);
 
-  overflow-y: auto;
-
-  background: rgba(29, 50, 21, 0.98);
-
-  color: white;
-
-  padding: 34px 30px;
-
-  box-sizing: border-box;
-
+  overflow: hidden;
 }
 
-#title {
+#sidebar h1 {
+  margin: 0 0 20px 0;
 
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cinzel", serif;
 
-  font-size: 4.5rem;
+  font-size: 54px;
+  line-height: 0.92;
+  font-weight: 900;
 
-  line-height: 0.86;
-
-  margin: 0 0 24px 0;
-
-  letter-spacing: -2px;
-
+  letter-spacing: -1px;
 }
 
-#intro {
+.intro {
+  margin: 0;
 
-  font-size: 16px;
+  font-size: 15px;
+  line-height: 1.5;
 
-  line-height: 1.45;
-
-  margin-bottom: 24px;
-
+  color: rgba(255,255,255,0.92);
 }
 
 #countdown {
+  margin-top: 22px;
+  margin-bottom: 26px;
+
+  padding: 14px;
 
   background: rgba(255,255,255,0.08);
 
-  padding: 16px;
-
-  margin-bottom: 34px;
-
-  font-size: 20px;
-
-  font-weight: 600;
-
+  font-size: 15px;
+  font-weight: 700;
 }
 
-#trips-heading {
+#sidebar h2 {
+  margin: 0 0 16px 0;
 
-  font-family: 'Cormorant Garamond', serif;
+  font-family: "Cinzel", serif;
 
-  font-size: 3.5rem;
-
-  margin: 0 0 22px 0;
-
+  font-size: 42px;
+  line-height: 1;
 }
 
 #trip-list {
-
   list-style: none;
-
   padding: 0;
   margin: 0;
-
 }
 
 #trip-list li {
+  margin: 10px 0;
 
-  margin-bottom: 18px;
-
-  font-size: 21px;
+  font-size: 18px;
+  font-weight: 600;
 
   cursor: pointer;
-
-  transition: opacity 0.2s;
-
-}
-
-#trip-list li:hover {
-
-  opacity: 0.7;
-
-}
-
-#trip-list li.active {
-
-  background: rgba(120,200,80,0.35);
-
-  padding: 10px;
-
-  border-radius: 6px;
-
-}
-
-/* BUTTONS */
-
-#menu-button,
-#back-button {
-
-  background: #29421f;
 
   color: white;
 
+  transition: opacity 0.2s ease;
+}
+
+#trip-list li:hover {
+  opacity: 0.7;
+}
+
+#trip-list li.active {
+  color: #d8ff9d;
+}
+
+/* MOBILE BUTTONS */
+
+#menu-button,
+#back-button {
+  display: none;
+
   border: none;
+
+  background: rgba(0,0,0,0.35);
+
+  color: white;
 
   padding: 12px 16px;
 
-  font-size: 18px;
-
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
 
   cursor: pointer;
-
-}
-
-#menu-button {
-
-  display: none;
-
-  position: fixed;
-
-  top: 12px;
-  left: 12px;
-
-  z-index: 999;
-
-}
-
-#back-button {
-
-  display: none;
-
-  margin-bottom: 28px;
-
 }
 
 /* DPAD */
 
 #dpad {
-
   position: absolute;
 
-  bottom: 18px;
   right: 18px;
+  bottom: 18px;
 
   display: none;
 
-  grid-template-columns: repeat(3, 60px);
-  grid-template-rows: repeat(3, 60px);
+  grid-template-columns: repeat(3, 58px);
+  grid-template-rows: repeat(3, 58px);
 
-  gap: 10px;
-
-  z-index: 20;
-
+  gap: 8px;
 }
 
 #dpad button {
-
   border: none;
 
-  background: rgba(40,60,30,0.6);
+  background: rgba(0,0,0,0.28);
 
   color: white;
 
-  font-size: 24px;
+  font-size: 22px;
 
+  backdrop-filter: blur(4px);
 }
 
 #dpad button[data-dir="up"] {
-
   grid-column: 2;
-
 }
 
 #dpad button[data-dir="left"] {
-
   grid-column: 1;
   grid-row: 2;
-
 }
 
 #dpad button[data-dir="right"] {
-
   grid-column: 3;
   grid-row: 2;
-
 }
 
 #dpad button[data-dir="down"] {
-
   grid-column: 2;
   grid-row: 3;
-
 }
 
 /* MOBILE */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
 
   body {
-
     overflow: hidden;
-
   }
 
-  #game-container {
-
-    padding: 0;
-
-    align-items: flex-start;
-
+  #app {
+    display: block;
   }
 
   canvas {
-
     width: 100vw;
-
     height: auto;
-
-    max-height: 72vh;
-
-    border-radius: 0;
-
   }
 
   #sidebar {
-
     position: fixed;
 
     top: 0;
     right: -100%;
 
     width: 100%;
-    min-width: 100%;
-
     height: 100%;
 
-    z-index: 998;
+    z-index: 100;
 
-    transition: right 0.3s ease;
+    transition: right 0.25s ease;
 
+    overflow-y: auto;
   }
 
   #sidebar.open {
-
     right: 0;
+  }
 
+  #sidebar h1 {
+    margin-top: 74px;
+
+    font-size: 44px;
+  }
+
+  #sidebar h2 {
+    font-size: 34px;
   }
 
   #menu-button {
-
     display: block;
 
+    position: fixed;
+
+    top: 18px;
+    left: 18px;
+
+    z-index: 120;
   }
 
   #back-button {
-
     display: block;
 
+    position: absolute;
+
+    top: 18px;
+    left: 18px;
   }
 
   #dpad {
-
     display: grid;
-
   }
-
 }
