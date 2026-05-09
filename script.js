@@ -6,13 +6,15 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.width = 960;
   canvas.height = 720;
 
-  // IMAGES
+  // IMAGE LOADER
 
   function load(src) {
     const img = new Image();
     img.src = src;
     return img;
   }
+
+  // IMAGES
 
   const duckImg = load("./assets/duck.png");
 
@@ -26,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const bushImg = load("./assets/bush.png");
 
-  // DESTINATIONS
+  // PLACES
 
   const places = [
 
@@ -36,8 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
       url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1591163723#gid=1591163723",
       gridX: 0,
       gridY: 2,
-      frameCount: 4,
-      shadow: true
+      frameCount: 4
     },
 
     {
@@ -46,8 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
       url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1346249244#gid=1346249244",
       gridX: 2,
       gridY: 2,
-      frameCount: 6,
-      shadow: true
+      frameCount: 6
     },
 
     {
@@ -56,8 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
       url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1978556881#gid=1978556881",
       gridX: 0,
       gridY: 0,
-      frameCount: 4,
-      shadow: true
+      frameCount: 4
     },
 
     {
@@ -66,13 +65,12 @@ document.addEventListener("DOMContentLoaded", () => {
       url: "https://calendar.google.com/calendar/u/0?cid=YmIzYjY5ZDk2OGE5MDg3NDUxMjJiOTkxZWQ3ZjRkMzdmY2JkNGJjNWQ5ZWRiNGIwOGI2NjYzYWI3NTJhYzRhNEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t",
       gridX: 1,
       gridY: 1,
-      frameCount: 4,
-      shadow: true
+      frameCount: 4
     }
 
   ];
 
-  // SCENIC
+  // SCENERY
 
   const scenery = [
 
@@ -96,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const tripList = document.getElementById("trip-list");
 
-  places.forEach((place, index) => {
+  places.forEach(place => {
 
     const li = document.createElement("li");
 
@@ -143,15 +141,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // GRID
 
-  const GRID = {
-    cols: 3,
-    rows: 3
-  };
-
   function getGridPos(gridX, gridY) {
 
-    const cellWidth = canvas.width / GRID.cols;
-    const cellHeight = canvas.height / GRID.rows;
+    const cellWidth = canvas.width / 3;
+    const cellHeight = canvas.height / 3;
 
     return {
       x: gridX * cellWidth + cellWidth / 2,
@@ -163,15 +156,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // PLAYER
 
   const player = {
+
     x: canvas.width / 2,
     y: canvas.height / 2,
 
-    size: 78,
+    size: 72,
 
     speed: 4,
 
     frame: 0,
     idle: 0
+
   };
 
   // BUSHES
@@ -216,15 +211,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // MOBILE MENU
 
   const menuButton = document.getElementById("menu-button");
-  const backButton = document.getElementById("back-button");
   const sidebar = document.getElementById("sidebar");
 
   menuButton.addEventListener("click", () => {
-    sidebar.classList.add("open");
-  });
 
-  backButton.addEventListener("click", () => {
-    sidebar.classList.remove("open");
+    sidebar.classList.toggle("open");
+
+    if (sidebar.classList.contains("open")) {
+      menuButton.textContent = "Back";
+    } else {
+      menuButton.textContent = "Trips";
+    }
+
   });
 
   // HELPERS
@@ -232,6 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function isNear(x1, y1, x2, y2) {
     return Math.hypot(x1 - x2, y1 - y2) < 90;
   }
+
+  // FIXED SPRITE RENDERER
 
   function drawSprite(
     img,
@@ -241,6 +241,38 @@ document.addEventListener("DOMContentLoaded", () => {
     size,
     frameCount = 4
   ) {
+
+    // 2x2 sprite sheets
+
+    if (frameCount === 4) {
+
+      const cols = 2;
+      const rows = 2;
+
+      const fw = img.width / cols;
+      const fh = img.height / rows;
+
+      const currentFrame = Math.floor(frame % 4);
+
+      const fx = (currentFrame % cols) * fw;
+      const fy = Math.floor(currentFrame / cols) * fh;
+
+      ctx.drawImage(
+        img,
+        fx,
+        fy,
+        fw,
+        fh,
+        x,
+        y,
+        size,
+        size
+      );
+
+      return;
+    }
+
+    // horizontal strips
 
     const fw = img.width / frameCount;
     const fh = img.height;
@@ -281,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
       player.x += player.speed;
     }
 
-    // wrap
+    // WRAP
 
     if (player.x < -20) player.x = canvas.width;
     if (player.x > canvas.width) player.x = -20;
@@ -300,9 +332,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // bushes
+    // BUSHES
 
-    ctx.globalAlpha = 0.22;
+    ctx.globalAlpha = 0.2;
 
     bushes.forEach(b => {
 
@@ -310,21 +342,21 @@ document.addEventListener("DOMContentLoaded", () => {
         bushImg,
         b.x,
         b.y,
-        62,
-        62
+        60,
+        60
       );
 
     });
 
     ctx.globalAlpha = 1;
 
-    // reset active links
+    // RESET SIDEBAR
 
     places.forEach(place => {
       place.sidebarElement.classList.remove("active");
     });
 
-    // scenery
+    // SCENERY
 
     scenery.forEach(item => {
 
@@ -338,7 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       if (touching) {
-        item.frame = (item.frame || 0) + 0.14;
+        item.frame = (item.frame || 0) + 0.12;
       } else {
         item.frame = 0;
       }
@@ -354,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
-    // interactive places
+    // INTERACTIVE
 
     places.forEach(place => {
 
@@ -379,9 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       }
 
-      // shadow only on clickable items
-
-      ctx.shadowColor = "rgba(0,0,0,0.16)";
+      ctx.shadowColor = "rgba(0,0,0,0.18)";
       ctx.shadowBlur = 14;
 
       drawSprite(
@@ -397,7 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
-    // duck
+    // DUCK
 
     const bounce = Math.sin(player.idle) * 2;
 

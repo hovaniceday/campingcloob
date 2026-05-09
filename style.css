@@ -7,6 +7,7 @@ body {
   overflow: hidden;
 
   background: #c7e89a;
+
   color: white;
 
   font-family: "Inter", sans-serif;
@@ -14,11 +15,12 @@ body {
 
 #app {
   display: flex;
+
   width: 100vw;
   height: 100vh;
 }
 
-/* GAME AREA */
+/* GAME */
 
 #game-container {
   flex: 1;
@@ -38,12 +40,12 @@ canvas {
 
   aspect-ratio: 4 / 3;
 
+  display: block;
+
   background: #c7e89a;
 
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-
-  display: block;
 }
 
 /* SIDEBAR */
@@ -53,13 +55,13 @@ canvas {
 
   padding: 28px;
 
-  background: rgba(24, 52, 18, 0.96);
+  background: rgba(24, 52, 18, 0.97);
 
   overflow: hidden;
 }
 
 #sidebar h1 {
-  margin: 0 0 20px 0;
+  margin: 0 0 22px 0;
 
   font-family: "Cinzel", serif;
 
@@ -74,16 +76,16 @@ canvas {
   margin: 0;
 
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.55;
 
-  color: rgba(255,255,255,0.92);
+  color: rgba(255,255,255,0.94);
 }
 
 #countdown {
   margin-top: 22px;
-  margin-bottom: 26px;
+  margin-bottom: 28px;
 
-  padding: 14px;
+  padding: 15px;
 
   background: rgba(255,255,255,0.08);
 
@@ -92,25 +94,25 @@ canvas {
 }
 
 #sidebar h2 {
-  margin: 0 0 16px 0;
+  margin: 0 0 18px 0;
 
   font-family: "Cinzel", serif;
 
   font-size: 42px;
-  line-height: 1;
 }
 
 #trip-list {
   list-style: none;
+
   padding: 0;
   margin: 0;
 }
 
 #trip-list li {
-  margin: 10px 0;
+  margin: 12px 0;
 
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
 
   cursor: pointer;
 
@@ -124,25 +126,33 @@ canvas {
 }
 
 #trip-list li.active {
-  color: #d8ff9d;
+  color: #dbff9d;
 }
 
-/* MOBILE BUTTONS */
+/* MOBILE BUTTON */
 
-#menu-button,
-#back-button {
+#menu-button {
   display: none;
+
+  position: fixed;
+
+  top: 18px;
+  left: 18px;
+
+  z-index: 300;
 
   border: none;
 
-  background: rgba(0,0,0,0.35);
+  padding: 12px 16px;
+
+  background: rgba(0,0,0,0.34);
 
   color: white;
 
-  padding: 12px 16px;
-
   font-size: 16px;
   font-weight: 700;
+
+  backdrop-filter: blur(4px);
 
   cursor: pointer;
 }
@@ -152,8 +162,8 @@ canvas {
 #dpad {
   position: absolute;
 
-  right: 18px;
-  bottom: 18px;
+  right: 20px;
+  bottom: 92px;
 
   display: none;
 
@@ -161,12 +171,14 @@ canvas {
   grid-template-rows: repeat(3, 58px);
 
   gap: 8px;
+
+  z-index: 120;
 }
 
 #dpad button {
   border: none;
 
-  background: rgba(0,0,0,0.28);
+  background: rgba(0,0,0,0.26);
 
   color: white;
 
@@ -206,9 +218,20 @@ canvas {
     display: block;
   }
 
+  #game-container {
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   canvas {
     width: 100vw;
     height: auto;
+
+    max-height: 78vh;
   }
 
   #sidebar {
@@ -220,7 +243,7 @@ canvas {
     width: 100%;
     height: 100%;
 
-    z-index: 100;
+    z-index: 200;
 
     transition: right 0.25s ease;
 
@@ -232,7 +255,7 @@ canvas {
   }
 
   #sidebar h1 {
-    margin-top: 74px;
+    margin-top: 80px;
 
     font-size: 44px;
   }
@@ -243,25 +266,11 @@ canvas {
 
   #menu-button {
     display: block;
-
-    position: fixed;
-
-    top: 18px;
-    left: 18px;
-
-    z-index: 120;
-  }
-
-  #back-button {
-    display: block;
-
-    position: absolute;
-
-    top: 18px;
-    left: 18px;
   }
 
   #dpad {
     display: grid;
+
+    bottom: 110px;
   }
 }
