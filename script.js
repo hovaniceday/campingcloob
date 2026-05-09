@@ -13,7 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
     camp: "./assets/campsite.png",
     tree: "./assets/tree.png",
     willow: "./assets/willow.png",
-    bush: "./assets/bush.png"
+    bush: "./assets/bush.png",
+    cat: "./assets/cat.png"
   };
 
   const images = {};
@@ -24,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       img.onload = () => {
         images[name] = img;
-        console.log(`Loaded image: ${name}`, img.width, img.height);
         resolve();
       };
 
@@ -50,6 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
         url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1591163723#gid=1591163723",
         gridX: 0,
         gridY: 2,
+        offsetX: -20,
+        offsetY: 6,
         frame: 0,
         frameSpeed: 0.16,
         size: 92
@@ -60,6 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
         url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1346249244#gid=1346249244",
         gridX: 2,
         gridY: 2,
+        offsetX: -40,
+        offsetY: -14,
         frame: 0,
         frameSpeed: 0.16,
         size: 96
@@ -70,19 +74,24 @@ document.addEventListener("DOMContentLoaded", () => {
         url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1978556881#gid=1978556881",
         gridX: 0,
         gridY: 0,
+        offsetX: 28,
+        offsetY: 8,
         frame: 0,
         frameSpeed: 0.16,
         size: 104
       },
       {
-        name: "Campsite",
+        name: "Basecamp",
         img: images.camp,
         url: "https://calendar.google.com/calendar/u/0?cid=YmIzYjY5ZDk2OGE5MDg3NDUxMjJiOTkxZWQ3ZjRkMzdmY2JkNGJjNWQ5ZWRiNGIwOGI2NjYzYWI3NTJhYzRhNEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t",
         gridX: 1,
         gridY: 1,
+        offsetX: -10,
+        offsetY: -8,
         frame: 0,
         frameSpeed: 0.16,
-        size: 92
+        size: 92,
+        icon: "calendar"
       }
     ];
 
@@ -91,6 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
         img: images.tree,
         gridX: 1,
         gridY: 0,
+        offsetX: -34,
+        offsetY: 8,
         frame: 0,
         frameSpeed: 0.1,
         size: 88
@@ -99,6 +110,8 @@ document.addEventListener("DOMContentLoaded", () => {
         img: images.willow,
         gridX: 1,
         gridY: 2,
+        offsetX: -22,
+        offsetY: -18,
         frame: 0,
         frameSpeed: 0.1,
         size: 88
@@ -110,7 +123,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     places.forEach(place => {
       const li = document.createElement("li");
-      li.textContent = place.name;
+
+      if (place.icon === "calendar") {
+        li.innerHTML = `
+          <span class="trip-link-content">
+            <svg class="trip-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="2"></rect>
+              <path d="M8 3v4M16 3v4M4 10h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+            <span>${place.name}</span>
+          </span>
+        `;
+      } else {
+        li.textContent = place.name;
+      }
 
       li.addEventListener("click", () => {
         window.location.href = place.url;
@@ -142,13 +168,13 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCountdown();
     setInterval(updateCountdown, 60000);
 
-    function getGridPos(gridX, gridY) {
+    function getGridPos(gridX, gridY, offsetX = 0, offsetY = 0) {
       const cellWidth = canvas.width / 3;
       const cellHeight = canvas.height / 3;
 
       return {
-        x: gridX * cellWidth + cellWidth / 2,
-        y: gridY * cellHeight + cellHeight / 2
+        x: gridX * cellWidth + cellWidth / 2 + offsetX,
+        y: gridY * cellHeight + cellHeight / 2 + offsetY
       };
     }
 
@@ -161,7 +187,34 @@ document.addEventListener("DOMContentLoaded", () => {
       idle: 0
     };
 
-    // BUSHES — back to plain-image random scatter
+    const cat = {
+      x: canvas.width * 0.72,
+      y: canvas.height * 0.42,
+      size: 54,
+      frame: 0,
+      speed: 2.4,
+      wanderAngle: Math.random() * Math.PI * 2,
+      wanderTimer: 0,
+      caughtUntil: 0,
+      hiddenUntil: 0
+    };
+
+    const catToast = document.getElementById("cat-toast");
+
+    function showCatToast() {
+      catToast.classList.add("show");
+
+      window.setTimeout(() => {
+        catToast.classList.remove("show");
+      }, 1200);
+    }
+
+    function respawnCat() {
+      cat.x = 80 + Math.random() * (canvas.width - 160);
+      cat.y = 80 + Math.random() * (canvas.height - 160);
+      cat.wanderAngle = Math.random() * Math.PI * 2;
+    }
+
     const bushes = [];
     const bushCount = 34;
     const bushPadding = 28;
@@ -219,8 +272,8 @@ document.addEventListener("DOMContentLoaded", () => {
       menuButton.textContent = sidebar.classList.contains("open") ? "Back" : "Trips";
     });
 
-    function isNear(x1, y1, x2, y2) {
-      return Math.hypot(x1 - x2, y1 - y2) < 96;
+    function isNear(x1, y1, x2, y2, distance = 96) {
+      return Math.hypot(x1 - x2, y1 - y2) < distance;
     }
 
     function drawShadow(x, y, width = 34) {
@@ -261,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return true;
     }
 
-    function update() {
+    function updatePlayer() {
       if (keys["ArrowUp"] || keys["w"] || keys["up"]) {
         player.y -= player.speed;
       }
@@ -287,10 +340,71 @@ document.addEventListener("DOMContentLoaded", () => {
       player.frame = (player.frame + 0.14) % 4;
     }
 
+    function updateCat() {
+      if (!images.cat) return;
+
+      const now = performance.now();
+
+      if (now < cat.hiddenUntil) return;
+
+      const dx = cat.x - player.x;
+      const dy = cat.y - player.y;
+      const distance = Math.hypot(dx, dy);
+
+      if (distance < 38) {
+        showCatToast();
+        cat.hiddenUntil = now + 1400;
+        window.setTimeout(respawnCat, 900);
+        return;
+      }
+
+      if (distance < 150) {
+        const angle = Math.atan2(dy, dx);
+        cat.x += Math.cos(angle) * cat.speed * 2.2;
+        cat.y += Math.sin(angle) * cat.speed * 2.2;
+      } else {
+        cat.wanderTimer -= 1;
+
+        if (cat.wanderTimer <= 0) {
+          cat.wanderAngle += (Math.random() - 0.5) * 1.5;
+          cat.wanderTimer = 40 + Math.random() * 80;
+        }
+
+        cat.x += Math.cos(cat.wanderAngle) * cat.speed * 0.45;
+        cat.y += Math.sin(cat.wanderAngle) * cat.speed * 0.45;
+      }
+
+      if (cat.x < 40) {
+        cat.x = 40;
+        cat.wanderAngle = Math.random() * Math.PI * 2;
+      }
+
+      if (cat.x > canvas.width - 40) {
+        cat.x = canvas.width - 40;
+        cat.wanderAngle = Math.random() * Math.PI * 2;
+      }
+
+      if (cat.y < 40) {
+        cat.y = 40;
+        cat.wanderAngle = Math.random() * Math.PI * 2;
+      }
+
+      if (cat.y > canvas.height - 40) {
+        cat.y = canvas.height - 40;
+        cat.wanderAngle = Math.random() * Math.PI * 2;
+      }
+
+      cat.frame = (cat.frame + 0.12) % 4;
+    }
+
+    function update() {
+      updatePlayer();
+      updateCat();
+    }
+
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Bushes: plain image, no sprite slicing, top-left positioning
       if (images.bush) {
         bushes.forEach(bush => {
           ctx.save();
@@ -313,7 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const drawables = [];
 
       scenery.forEach(item => {
-        const pos = getGridPos(item.gridX, item.gridY);
+        const pos = getGridPos(item.gridX, item.gridY, item.offsetX, item.offsetY);
         const touching = isNear(player.x, player.y, pos.x, pos.y);
 
         item.frame = touching ? (item.frame + item.frameSpeed) % 4 : 0;
@@ -327,7 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       places.forEach(place => {
-        const pos = getGridPos(place.gridX, place.gridY);
+        const pos = getGridPos(place.gridX, place.gridY, place.offsetX, place.offsetY);
         const touching = isNear(player.x, player.y, pos.x, pos.y);
 
         place.hover = (place.hover || 0) + 0.05;
@@ -360,13 +474,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
+      if (images.cat && performance.now() >= cat.hiddenUntil) {
+        drawables.push({
+          y: cat.y,
+          draw: () => {
+            drawShadow(cat.x, cat.y, 18);
+            drawSprite2x2(images.cat, cat.frame, cat.x, cat.y, cat.size);
+          }
+        });
+      }
+
       drawables.sort((a, b) => a.y - b.y);
       drawables.forEach(item => item.draw());
     }
 
     function activateNearbyPlace() {
       for (const place of places) {
-        const pos = getGridPos(place.gridX, place.gridY);
+        const pos = getGridPos(place.gridX, place.gridY, place.offsetX, place.offsetY);
 
         if (isNear(player.x, player.y, pos.x, pos.y)) {
           window.location.href = place.url;

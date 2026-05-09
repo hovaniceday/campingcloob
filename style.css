@@ -104,6 +104,42 @@ canvas {
   color: #dbff9d;
 }
 
+.trip-link-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trip-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+/* CAT TOAST */
+
+#cat-toast {
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  transform: translateX(-50%) translateY(-12px);
+  z-index: 140;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: rgba(24, 52, 18, 0.92);
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#cat-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* MOBILE MENU BUTTON */
 
 #menu-button {
@@ -212,6 +248,11 @@ canvas {
 
   #dpad {
     display: grid;
-    bottom: 112px;
+    bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+
+  #cat-toast {
+    top: 86px;
+    font-size: 18px;
   }
 }
