@@ -301,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const fireflies = [];
-    const fireflyCount = isMobileViewport() ? 8 : 16;
+    const fireflyCount = isMobileViewport() ? 4 : 8;
 
     for (let i = 0; i < fireflyCount; i++) {
       fireflies.push({
@@ -312,18 +312,22 @@ document.addEventListener("DOMContentLoaded", () => {
         phase: Math.random() * Math.PI * 2,
 
         // slow, fairy-ish drifting
-        speed: 0.0012 + Math.random() * 0.002,
+        speed: 0.001 + Math.random() * 0.0017,
         drift: 18 + Math.random() * 28,
 
         // visible animated 2x2 body
         size: 26 + Math.random() * 10,
 
         // bigger warmer glow
-        glowSize: 28 + Math.random() * 30,
+        glowSize: 30 + Math.random() * 32,
 
         alpha: 0.42 + Math.random() * 0.3,
         frame: Math.floor(Math.random() * 4),
-        frameSpeed: 0.035 + Math.random() * 0.025
+        frameSpeed: 0.025 + Math.random() * 0.02,
+
+        // stronger blinking, but still soft
+        blinkSpeed: 0.0018 + Math.random() * 0.0014,
+        blinkOffset: Math.random() * Math.PI * 2
       });
     }
 
@@ -446,9 +450,9 @@ document.addEventListener("DOMContentLoaded", () => {
         fly.glowSize
       );
 
-      gradient.addColorStop(0, `rgba(255, 255, 180, ${0.7 * pulse})`);
-      gradient.addColorStop(0.28, `rgba(255, 235, 95, ${0.34 * pulse})`);
-      gradient.addColorStop(0.65, `rgba(190, 255, 140, ${0.12 * pulse})`);
+      gradient.addColorStop(0, `rgba(255, 255, 185, ${0.78 * pulse})`);
+      gradient.addColorStop(0.22, `rgba(255, 235, 95, ${0.42 * pulse})`);
+      gradient.addColorStop(0.62, `rgba(190, 255, 140, ${0.14 * pulse})`);
       gradient.addColorStop(1, "rgba(190, 255, 140, 0)");
 
       ctx.fillStyle = gradient;
@@ -456,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.arc(fly.x, fly.y, fly.glowSize * 1.25, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.globalAlpha = Math.min(1, fly.alpha * pulse * 1.35);
+      ctx.globalAlpha = Math.min(1, fly.alpha * pulse * 1.45);
 
       if (images.firefly) {
         drawSprite2x2(images.firefly, fly.frame, fly.x, fly.y, fly.size);
@@ -616,7 +620,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const now = performance.now();
 
       fireflies.forEach(fly => {
-        const pulse = 0.68 + Math.sin(now * 0.0009 + fly.phase) * 0.32;
+        const blink = (Math.sin(now * fly.blinkSpeed + fly.blinkOffset) + 1) / 2;
+        const pulse = 0.18 + Math.pow(blink, 2.5) * 0.82;
         drawFirefly(fly, pulse);
       });
 
