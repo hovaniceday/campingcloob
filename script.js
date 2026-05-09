@@ -6,14 +6,18 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.width = 320;
   canvas.height = 240;
 
-  // -----------------------
+  // --------------------
   // COUNTDOWN
-  // -----------------------
+  // --------------------
+
   const countdownEl = document.getElementById("countdown");
+
   const launchDate = new Date("May 22, 2026 15:00:00 GMT-0400");
+
   let isUnlocked = false;
 
   function updateCountdown() {
+
     const now = new Date();
     const diff = launchDate - now;
 
@@ -23,19 +27,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const d = Math.floor(diff / (1000*60*60*24));
-    const h = Math.floor((diff / (1000*60*60)) % 24);
-    const m = Math.floor((diff / (1000*60)) % 60);
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / (1000 * 60)) % 60);
 
     countdownEl.textContent = `Opens in ${d}d ${h}h ${m}m`;
   }
 
-  setInterval(updateCountdown, 1000);
   updateCountdown();
+  setInterval(updateCountdown, 1000);
 
-  // -----------------------
+  // --------------------
   // IMAGES
-  // -----------------------
+  // --------------------
+
   const images = {};
 
   function loadImage(name, src) {
@@ -47,183 +52,459 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   Promise.all([
+
     loadImage("duck", "./assets/duck.png"),
-    loadImage("boat", "./assets/boat.png"),
     loadImage("trout", "./assets/trout.png"),
-    loadImage("willow", "./assets/willow.png"),
-    loadImage("tree", "./assets/tree.png"),
     loadImage("camp", "./assets/campsite.png"),
+    loadImage("highpeak", "./assets/highpeak.png"),
+    loadImage("puffin", "./assets/puffin.png"),
+
+    loadImage("tree", "./assets/tree.png"),
+    loadImage("willow", "./assets/willow.png"),
+    loadImage("boat", "./assets/boat.png"),
+
     loadImage("bush", "./assets/bush.png")
+
   ]).then(results => {
 
-    results.forEach(r => images[r.name] = r.img);
+    results.forEach(r => {
+      images[r.name] = r.img;
+    });
 
     startGame();
 
   });
 
-  // -----------------------
-  // GAME STARTS AFTER LOAD
-  // -----------------------
+  // --------------------
+  // GAME
+  // --------------------
+
   function startGame() {
 
     const DESTS = [
-      { name: "Acadia", url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1978556881" },
-      { name: "Beaverkill", url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1591163723" },
-      { name: "Adirondacks", url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1346249244" },
-      { name: "Campsite", url: "https://calendar.google.com" }
+      {
+        name: "Beaverkill",
+        url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1591163723#gid=1591163723"
+      },
+      {
+        name: "Adirondacks",
+        url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1346249244#gid=1346249244"
+      },
+      {
+        name: "Acadia",
+        url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1978556881#gid=1978556881"
+      },
+      {
+        name: "Campsite",
+        url: "https://calendar.google.com/calendar/u/0?cid=YmIzYjY5ZDk2OGE5MDg3NDUxMjJiOTkxZWQ3ZjRkMzdmY2JkNGJjNWQ5ZWRiNGIwOGI2NjYzYWI3NTJhYzRhNEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t"
+      }
     ];
+
+    // SIDEBAR LINKS
 
     const list = document.getElementById("trip-list");
 
-    DESTS.forEach((d,i)=>{
+    DESTS.forEach((d, i) => {
+
       const li = document.createElement("li");
+
       li.textContent = d.name;
+
       li.onclick = () => {
+
         if (!isUnlocked) return;
-        window.open(d.url);
+
+        window.open(d.url, "_blank");
+
       };
+
       list.appendChild(li);
+
     });
+
+    const sidebarItems = document.querySelectorAll("#trip-list li");
+
+    // GRID
 
     const GRID = 3;
 
-    function pos(gx,gy){
+    function gridPos(gx, gy) {
+
       return {
-        x: (gx+0.5)*(canvas.width/GRID),
-        y: (gy+0.5)*(canvas.height/GRID)
+        x: (gx + 0.5) * (canvas.width / GRID),
+        y: (gy + 0.5) * (canvas.height / GRID)
       };
+
     }
 
-    function near(a,b){
-      return Math.hypot(a.x-b.x,a.y-b.y)<50;
+    function near(a, b) {
+
+      return Math.hypot(a.x - b.x, a.y - b.y) < 46;
+
     }
+
+    // PLAYER
 
     const player = {
-      x:160,
-      y:120,
-      frame:0,
-      idle:0
+      x: 160,
+      y: 120,
+      frame: 0,
+      idle: 0
     };
+
+    // INTERACTIVE
 
     const places = [
-      { gx:2,gy:0,img:images.boat,i:0,f:0,idle:0 },
-      { gx:0,gy:2,img:images.trout,i:1,f:0,idle:0 },
-      { gx:2,gy:2,img:images.willow,i:2,f:0,idle:0 },
-      { gx:1,gy:1,img:images.camp,i:3,f:0,idle:0 }
+
+      {
+        gx: 0,
+        gy: 2,
+        img: images.trout,
+        index: 0,
+        frame: 0,
+        hover: 0
+      },
+
+      {
+        gx: 2,
+        gy: 2,
+        img: images.highpeak,
+        index: 1,
+        frame: 0,
+        hover: 0
+      },
+
+      {
+        gx: 2,
+        gy: 0,
+        img: images.puffin,
+        index: 2,
+        frame: 0,
+        hover: 0
+      },
+
+      {
+        gx: 1,
+        gy: 1,
+        img: images.camp,
+        index: 3,
+        frame: 0,
+        hover: 0
+      }
+
     ];
 
-    const env = [
-      { gx:1,gy:0,img:images.tree,f:0 }
+    // SCENIC INTERACTIVE
+
+    const environment = [
+
+      {
+        gx: 1,
+        gy: 0,
+        img: images.tree,
+        frame: 0
+      },
+
+      {
+        gx: 1,
+        gy: 2,
+        img: images.willow,
+        frame: 0
+      },
+
+      {
+        gx: 0,
+        gy: 0,
+        img: images.boat,
+        frame: 0
+      }
+
     ];
 
-    // 🌿 RANDOM BUSHES (soft + clustered)
+    // BUSHES
+
     const bushes = [];
-    for (let i = 0; i < 30; i++) {
+
+    for (let i = 0; i < 34; i++) {
+
       bushes.push({
+
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: 14 + Math.random() * 10,
-        alpha: 0.4 + Math.random() * 0.3
+
+        size: 16 + Math.random() * 8,
+        alpha: 0.35 + Math.random() * 0.25
+
       });
+
     }
+
+    // INPUT
 
     const keys = {};
-    onkeydown=e=>keys[e.key]=1;
-    onkeyup=e=>keys[e.key]=0;
 
-    function sprite(img,f,x,y){
-      const fw=img.width/2,fh=img.height/2;
-      ctx.drawImage(img,(f%2)*fw,Math.floor(f/2)*fh,fw,fh,x-16,y-16,32,32);
-    }
+    window.addEventListener("keydown", e => {
+      keys[e.key] = true;
+    });
 
-    function draw(){
+    window.addEventListener("keyup", e => {
+      keys[e.key] = false;
+    });
 
-      ctx.fillStyle="#b7e07a";
-      ctx.fillRect(0,0,320,240);
+    document.querySelectorAll("#dpad button").forEach(btn => {
 
-      // 🌿 bushes (BACK LAYER)
-      bushes.forEach(b=>{
-        ctx.globalAlpha = b.alpha;
-        ctx.drawImage(images.bush, b.x, b.y, b.size, b.size);
+      btn.addEventListener("touchstart", () => {
+        keys[btn.dataset.dir] = true;
       });
+
+      btn.addEventListener("touchend", () => {
+        keys[btn.dataset.dir] = false;
+      });
+
+    });
+
+    // SPRITES
+
+    function drawShadow(x, y, width = 18) {
+
+      ctx.globalAlpha = 0.18;
+
+      ctx.fillStyle = "black";
+
+      ctx.beginPath();
+
+      ctx.ellipse(x, y + 13, width, 5, 0, 0, Math.PI * 2);
+
+      ctx.fill();
+
       ctx.globalAlpha = 1;
 
-      const drawables=[];
+    }
 
-      // 🌳 tree
-      env.forEach(o=>{
-        const p=pos(o.gx,o.gy);
-        if(near(player,p)) o.f=(o.f+0.2)%4; else o.f=0;
+    function drawSprite(img, frame, x, y, size = 32) {
 
-        drawables.push({
-          y:p.y,
-          d:()=>sprite(o.img,Math.floor(o.f),p.x,p.y)
-        });
-      });
+      const cols = 2;
 
-      // 🎯 places
-      places.forEach(o=>{
-        const p=pos(o.gx,o.gy);
-        const n=near(player,p);
+      const fw = img.width / cols;
+      const fh = img.height / cols;
 
-        o.idle += 0.05;
-        const float = Math.sin(o.idle) * 2;
+      const fx = (frame % cols) * fw;
+      const fy = Math.floor(frame / cols) * fh;
 
-        if(n) o.f=(o.f+0.2)%4; else o.f=0;
+      ctx.drawImage(
+        img,
+        fx,
+        fy,
+        fw,
+        fh,
+        x - size / 2,
+        y - size / 2,
+        size,
+        size
+      );
 
-        drawables.push({
-          y:p.y,
-          d:()=>sprite(o.img,Math.floor(o.f),p.x,p.y + float)
-        });
-      });
+    }
 
-      // 🦆 duck (FIXED animation)
+    // UPDATE
+
+    function update() {
+
+      if (keys["ArrowUp"] || keys["up"]) player.y -= 2;
+      if (keys["ArrowDown"] || keys["down"]) player.y += 2;
+      if (keys["ArrowLeft"] || keys["left"]) player.x -= 2;
+      if (keys["ArrowRight"] || keys["right"]) player.x += 2;
+
+      player.x = (player.x + canvas.width) % canvas.width;
+      player.y = (player.y + canvas.height) % canvas.height;
+
       player.idle += 0.08;
-      player.frame = (player.frame + 0.15) % 4;
+
+    }
+
+    // DRAW
+
+    function draw() {
+
+      ctx.fillStyle = "#b7e07a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // bushes
+
+      bushes.forEach(b => {
+
+        ctx.globalAlpha = b.alpha;
+
+        ctx.drawImage(images.bush, b.x, b.y, b.size, b.size);
+
+      });
+
+      ctx.globalAlpha = 1;
+
+      sidebarItems.forEach(li => li.classList.remove("active"));
+
+      const drawables = [];
+
+      // ENVIRONMENT
+
+      environment.forEach(obj => {
+
+        const pos = gridPos(obj.gx, obj.gy);
+
+        if (near(player, pos)) {
+          obj.frame = (obj.frame + 0.15) % 4;
+        } else {
+          obj.frame = 0;
+        }
+
+        drawables.push({
+
+          y: pos.y,
+
+          draw: () => {
+
+            drawShadow(pos.x, pos.y);
+
+            drawSprite(
+              obj.img,
+              Math.floor(obj.frame),
+              pos.x,
+              pos.y
+            );
+
+          }
+
+        });
+
+      });
+
+      // INTERACTIVE
+
+      places.forEach(obj => {
+
+        const pos = gridPos(obj.gx, obj.gy);
+
+        const touching = near(player, pos);
+
+        obj.hover += 0.05;
+
+        const float = Math.sin(obj.hover) * 2;
+
+        if (touching) {
+
+          obj.frame = (obj.frame + 0.18) % 4;
+
+          sidebarItems[obj.index].classList.add("active");
+
+        } else {
+
+          obj.frame = 0;
+
+        }
+
+        drawables.push({
+
+          y: pos.y,
+
+          draw: () => {
+
+            drawShadow(pos.x, pos.y);
+
+            drawSprite(
+              obj.img,
+              Math.floor(obj.frame),
+              pos.x,
+              pos.y + float
+            );
+
+          }
+
+        });
+
+      });
+
+      // PLAYER
+
       const bounce = Math.sin(player.idle) * 2;
 
+      player.frame = (player.frame + 0.12) % 4;
+
       drawables.push({
-        y:player.y,
-        d:()=>sprite(images.duck,Math.floor(player.frame),player.x,player.y + bounce)
-      });
 
-      drawables.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
-    }
+        y: player.y,
 
-    function update(){
-      if(keys.ArrowUp) player.y-=2;
-      if(keys.ArrowDown) player.y+=2;
-      if(keys.ArrowLeft) player.x-=2;
-      if(keys.ArrowRight) player.x+=2;
+        draw: () => {
 
-      player.x=(player.x+320)%320;
-      player.y=(player.y+240)%240;
-    }
+          drawShadow(player.x, player.y, 12);
 
-    canvas.onclick=()=>{
-      places.forEach(o=>{
-        const p=pos(o.gx,o.gy);
-        if(near(player,p) && isUnlocked){
-          window.open(DESTS[o.i].url);
+          drawSprite(
+            images.duck,
+            Math.floor(player.frame),
+            player.x,
+            player.y + bounce
+          );
+
         }
+
       });
-    };
+
+      // DEPTH SORT
+
+      drawables.sort((a, b) => a.y - b.y);
+
+      drawables.forEach(d => d.draw());
+
+    }
+
+    // CLICK INTERACTION
+
+    canvas.addEventListener("click", () => {
+
+      if (!isUnlocked) return;
+
+      places.forEach(obj => {
+
+        const pos = gridPos(obj.gx, obj.gy);
+
+        if (near(player, pos)) {
+
+          window.open(
+            DESTS[obj.index].url,
+            "_blank"
+          );
+
+        }
+
+      });
+
+    });
+
+    // MENU
 
     const sidebar = document.getElementById("sidebar");
-    const btn = document.getElementById("menu-button");
-    const back = document.getElementById("back-button");
+    const menuBtn = document.getElementById("menu-button");
+    const backBtn = document.getElementById("back-button");
 
-    btn.onclick = () => sidebar.classList.toggle("open");
-    back.onclick = () => sidebar.classList.remove("open");
+    menuBtn.onclick = () => {
+      sidebar.classList.toggle("open");
+    };
 
-    function loop(){
+    backBtn.onclick = () => {
+      sidebar.classList.remove("open");
+    };
+
+    // LOOP
+
+    function loop() {
+
       update();
       draw();
+
       requestAnimationFrame(loop);
+
     }
 
     loop();
+
   }
 
 });
