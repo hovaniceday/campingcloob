@@ -301,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const fireflies = [];
-    const fireflyCount = isMobileViewport() ? 10 : 20;
+    const fireflyCount = isMobileViewport() ? 8 : 16;
 
     for (let i = 0; i < fireflyCount; i++) {
       fireflies.push({
@@ -310,11 +310,21 @@ document.addEventListener("DOMContentLoaded", () => {
         baseX: Math.random() * canvas.width,
         baseY: Math.random() * canvas.height,
         phase: Math.random() * Math.PI * 2,
-        speed: 0.004 + Math.random() * 0.006,
-        drift: 22 + Math.random() * 42,
-        size: 18 + Math.random() * 14,
-        glowSize: 18 + Math.random() * 18,
-        alpha: 0.55 + Math.random() * 0.35
+
+        // slower, dreamier movement
+        speed: 0.0012 + Math.random() * 0.002,
+
+        // softer wandering
+        drift: 18 + Math.random() * 28,
+
+        // delicate body size
+        size: 12 + Math.random() * 10,
+
+        // bigger glow than body
+        glowSize: 20 + Math.random() * 24,
+
+        // softer opacity
+        alpha: 0.35 + Math.random() * 0.28
       });
     }
 
@@ -428,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function drawFirefly(fly, pulse) {
       ctx.save();
 
-      // glow halo
+      // fairy/moody halo
       const gradient = ctx.createRadialGradient(
         fly.x,
         fly.y,
@@ -438,16 +448,16 @@ document.addEventListener("DOMContentLoaded", () => {
         fly.glowSize
       );
 
-      gradient.addColorStop(0, `rgba(255, 255, 100, ${0.55 * pulse})`);
-      gradient.addColorStop(0.35, `rgba(255, 230, 80, ${0.22 * pulse})`);
-      gradient.addColorStop(1, "rgba(255, 230, 80, 0)");
+      gradient.addColorStop(0, `rgba(255, 245, 160, ${0.42 * pulse})`);
+      gradient.addColorStop(0.35, `rgba(210, 255, 150, ${0.18 * pulse})`);
+      gradient.addColorStop(1, "rgba(210, 255, 150, 0)");
 
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.arc(fly.x, fly.y, fly.glowSize, 0, Math.PI * 2);
       ctx.fill();
 
-      // bright center
+      // tiny glowing sprite center
       ctx.globalAlpha = fly.alpha * pulse;
 
       if (images.firefly) {
@@ -459,7 +469,7 @@ document.addEventListener("DOMContentLoaded", () => {
           fly.size
         );
       } else {
-        ctx.fillStyle = "#fff46b";
+        ctx.fillStyle = "#fff6a3";
         ctx.fillRect(fly.x - 2, fly.y - 2, 4, 4);
       }
 
@@ -576,8 +586,8 @@ document.addEventListener("DOMContentLoaded", () => {
         fly.x = fly.baseX + Math.sin(now * fly.speed + fly.phase) * fly.drift;
         fly.y = fly.baseY + Math.cos(now * fly.speed * 0.8 + fly.phase) * (fly.drift * 0.6);
 
-        fly.baseX += Math.sin(fly.phase) * 0.08;
-        fly.baseY += Math.cos(fly.phase * 0.9) * 0.06;
+        fly.baseX += Math.sin(fly.phase) * 0.04;
+        fly.baseY += Math.cos(fly.phase * 0.9) * 0.03;
 
         if (fly.baseX < -20) fly.baseX = canvas.width + 20;
         if (fly.baseX > canvas.width + 20) fly.baseX = -20;
@@ -613,7 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const now = performance.now();
 
       fireflies.forEach(fly => {
-        const pulse = 0.6 + Math.sin(now * 0.004 + fly.phase) * 0.4;
+        const pulse = 0.55 + Math.sin(now * 0.0012 + fly.phase) * 0.35;
         drawFirefly(fly, pulse);
       });
 
