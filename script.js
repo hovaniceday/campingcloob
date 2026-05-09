@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
         resolve();
       };
 
-      // cache-bust while you are testing GitHub Pages
       img.src = `${src}?v=${Date.now()}`;
     });
   }
@@ -69,16 +68,11 @@ document.addEventListener("DOMContentLoaded", () => {
         name: "Acadia",
         img: images.puffin,
         url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1978556881#gid=1978556881",
-
-        // moved so it is not hidden near the duck/campsite
         gridX: 0,
         gridY: 0,
-
         frame: 0,
         frameSpeed: 0.16,
-        size: 104,
-
-        fallbackColor: "#ff4fd8"
+        size: 104
       },
       {
         name: "Campsite",
@@ -167,14 +161,17 @@ document.addEventListener("DOMContentLoaded", () => {
       idle: 0
     };
 
+    // BUSHES — back to plain-image random scatter
     const bushes = [];
+    const bushCount = 34;
+    const bushPadding = 28;
 
-    for (let i = 0; i < 34; i++) {
+    for (let i = 0; i < bushCount; i++) {
       bushes.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: 46 + Math.random() * 12,
-        alpha: 0.28 + Math.random() * 0.14
+        x: bushPadding + Math.random() * (canvas.width - bushPadding * 2),
+        y: bushPadding + Math.random() * (canvas.height - bushPadding * 2),
+        size: 34 + Math.random() * 10,
+        alpha: 0.34 + Math.random() * 0.12
       });
     }
 
@@ -236,23 +233,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.restore();
     }
 
-    function drawFallback(place, x, y, size) {
-      ctx.save();
-
-      ctx.fillStyle = place.fallbackColor || "#ff00ff";
-      ctx.beginPath();
-      ctx.arc(x, y, size / 3, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "#000";
-      ctx.font = "bold 22px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(place.name[0], x, y);
-
-      ctx.restore();
-    }
-
     function drawSprite2x2(img, frame, x, y, size) {
       if (!img) return false;
 
@@ -310,11 +290,18 @@ document.addEventListener("DOMContentLoaded", () => {
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Bushes: plain image, no sprite slicing, top-left positioning
       if (images.bush) {
         bushes.forEach(bush => {
           ctx.save();
           ctx.globalAlpha = bush.alpha;
-          drawSprite2x2(images.bush, 0, bush.x, bush.y, bush.size);
+          ctx.drawImage(
+            images.bush,
+            bush.x - bush.size / 2,
+            bush.y - bush.size / 2,
+            bush.size,
+            bush.size
+          );
           ctx.restore();
         });
       }
@@ -358,18 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
           y: pos.y,
           draw: () => {
             drawShadow(pos.x, pos.y, 38);
-
-            const didDraw = drawSprite2x2(
-              place.img,
-              place.frame,
-              pos.x,
-              pos.y + float,
-              place.size
-            );
-
-            if (!didDraw) {
-              drawFallback(place, pos.x, pos.y + float, place.size);
-            }
+            drawSprite2x2(place.img, place.frame, pos.x, pos.y + float, place.size);
           }
         });
       });
