@@ -202,6 +202,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const catToast = document.getElementById("cat-toast");
     let toastTimeout = null;
+    let mobileHintTarget = null;
+
+    function isMobileViewport() {
+      return window.matchMedia("(max-width: 900px)").matches;
+    }
 
     function showToast(message, duration = 1200) {
       catToast.textContent = message;
@@ -214,6 +219,21 @@ document.addEventListener("DOMContentLoaded", () => {
       toastTimeout = window.setTimeout(() => {
         catToast.classList.remove("show");
       }, duration);
+    }
+
+    function maybeShowMobileHint(targetId, message) {
+      if (!isMobileViewport()) return;
+
+      if (mobileHintTarget === targetId && catToast.classList.contains("show")) {
+        return;
+      }
+
+      mobileHintTarget = targetId;
+      showToast(message, 1400);
+    }
+
+    function clearMobileHintTarget() {
+      mobileHintTarget = null;
     }
 
     function respawnCat() {
@@ -477,10 +497,16 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const drawables = [];
+      let nearSomething = false;
 
-      scenery.forEach(item => {
+      scenery.forEach((item, index) => {
         const pos = getGridPos(item.gridX, item.gridY, item.offsetX, item.offsetY);
         const touching = isNear(player.x, player.y, pos.x, pos.y);
+
+        if (touching) {
+          nearSomething = true;
+          maybeShowMobileHint(`scenery-${index}`, "keep adventuring!");
+        }
 
         item.frame = touching ? (item.frame + item.frameSpeed) % 4 : 0;
 
@@ -499,8 +525,10 @@ document.addEventListener("DOMContentLoaded", () => {
         place.hover = (place.hover || 0) + 0.05;
 
         if (touching) {
+          nearSomething = true;
           place.frame = (place.frame + place.frameSpeed) % 4;
           place.sidebarElement.classList.add("active");
+          maybeShowMobileHint(`place-${place.name}`, "tap ● to see the trip!");
         } else {
           place.frame = 0;
         }
@@ -515,6 +543,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
       });
+
+      if (!nearSomething) {
+        clearMobileHintTarget();
+      }
 
       const duckBounce = Math.sin(player.idle) * 2;
 
