@@ -2,64 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Camping Cloob 2026</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
-
   <div id="app">
-
-    <div id="game-container">
-
+    <main id="game-container">
       <canvas id="game"></canvas>
 
-      <!-- MOBILE DPAD -->
       <div id="dpad">
         <button data-dir="up">↑</button>
         <button data-dir="left">←</button>
         <button data-dir="right">→</button>
         <button data-dir="down">↓</button>
       </div>
+    </main>
 
-    </div>
-
-    <!-- SIDEBAR -->
     <aside id="sidebar">
-
-      <h1>CAMPING<br/>CLOOB 2026</h1>
+      <h1>CAMPING<br />CLOOB<br />2026</h1>
 
       <p class="intro">
-        Welcome to the camping cloob! We are adventuring driving distance
-        around NYC. Sign up for spots to go on trips or peep our calendar
-        to see what day trips we will be rallying around. Hope to see you
-        outside this summer!
+        Welcome to the camping cloob! We are adventuring driving distance around NYC.
+        Sign up for spots to go on trips or peep our calendar to see what day trips
+        we will be rallying around. Hope to see you outside this summer!
       </p>
 
-      <div id="countdown">
-        Opens in ...
-      </div>
+      <div id="countdown">Opens in ...</div>
 
       <h2>Trips</h2>
-
       <ul id="trip-list"></ul>
-
     </aside>
-
   </div>
 
-  <!-- MOBILE MENU BUTTON -->
   <button id="menu-button">Trips</button>
 
   <script src="./script.js"></script>
-
 </body>
 </html>
