@@ -310,21 +310,13 @@ document.addEventListener("DOMContentLoaded", () => {
         baseX: Math.random() * canvas.width,
         baseY: Math.random() * canvas.height,
         phase: Math.random() * Math.PI * 2,
-
-        // slower, dreamier movement
         speed: 0.0012 + Math.random() * 0.002,
-
-        // softer wandering
         drift: 18 + Math.random() * 28,
-
-        // delicate body size
-        size: 12 + Math.random() * 10,
-
-        // bigger glow than body
-        glowSize: 20 + Math.random() * 24,
-
-        // softer opacity
-        alpha: 0.35 + Math.random() * 0.28
+        size: 26 + Math.random() * 10,
+        glowSize: 22 + Math.random() * 24,
+        alpha: 0.42 + Math.random() * 0.3,
+        frame: Math.floor(Math.random() * 4),
+        frameSpeed: 0.035 + Math.random() * 0.025
       });
     }
 
@@ -438,7 +430,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function drawFirefly(fly, pulse) {
       ctx.save();
 
-      // fairy/moody halo
       const gradient = ctx.createRadialGradient(
         fly.x,
         fly.y,
@@ -457,17 +448,10 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.arc(fly.x, fly.y, fly.glowSize, 0, Math.PI * 2);
       ctx.fill();
 
-      // tiny glowing sprite center
       ctx.globalAlpha = fly.alpha * pulse;
 
       if (images.firefly) {
-        ctx.drawImage(
-          images.firefly,
-          fly.x - fly.size / 2,
-          fly.y - fly.size / 2,
-          fly.size,
-          fly.size
-        );
+        drawSprite2x2(images.firefly, fly.frame, fly.x, fly.y, fly.size);
       } else {
         ctx.fillStyle = "#fff6a3";
         ctx.fillRect(fly.x - 2, fly.y - 2, 4, 4);
@@ -582,6 +566,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       fireflies.forEach(fly => {
         fly.phase += fly.speed;
+        fly.frame = (fly.frame + fly.frameSpeed) % 4;
 
         fly.x = fly.baseX + Math.sin(now * fly.speed + fly.phase) * fly.drift;
         fly.y = fly.baseY + Math.cos(now * fly.speed * 0.8 + fly.phase) * (fly.drift * 0.6);
