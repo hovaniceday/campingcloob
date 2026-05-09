@@ -190,13 +190,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const cat = {
       x: canvas.width * 0.72,
       y: canvas.height * 0.42,
-      size: 54,
+      size: 58,
       frame: 0,
       speed: 2.4,
       wanderAngle: Math.random() * Math.PI * 2,
       wanderTimer: 0,
-      caughtUntil: 0,
-      hiddenUntil: 0
+      hiddenUntil: 0,
+      isMoving: true,
+      isRunning: false
     };
 
     const catToast = document.getElementById("cat-toast");
@@ -213,6 +214,8 @@ document.addEventListener("DOMContentLoaded", () => {
       cat.x = 80 + Math.random() * (canvas.width - 160);
       cat.y = 80 + Math.random() * (canvas.height - 160);
       cat.wanderAngle = Math.random() * Math.PI * 2;
+      cat.isMoving = true;
+      cat.isRunning = false;
     }
 
     const bushes = [];
@@ -345,7 +348,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const now = performance.now();
 
-      if (now < cat.hiddenUntil) return;
+      if (now < cat.hiddenUntil) {
+        cat.isMoving = false;
+        cat.isRunning = false;
+        return;
+      }
+
+      const previousX = cat.x;
+      const previousY = cat.y;
 
       const dx = cat.x - player.x;
       const dy = cat.y - player.y;
@@ -354,15 +364,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (distance < 38) {
         showCatToast();
         cat.hiddenUntil = now + 1400;
+        cat.isMoving = false;
+        cat.isRunning = false;
         window.setTimeout(respawnCat, 900);
         return;
       }
 
       if (distance < 150) {
         const angle = Math.atan2(dy, dx);
-        cat.x += Math.cos(angle) * cat.speed * 2.2;
-        cat.y += Math.sin(angle) * cat.speed * 2.2;
+        cat.x += Math.cos(angle) * cat.speed * 2.35;
+        cat.y += Math.sin(angle) * cat.speed * 2.35;
+        cat.isRunning = true;
       } else {
+        cat.isRunning = false;
         cat.wanderTimer -= 1;
 
         if (cat.wanderTimer <= 0) {
@@ -394,7 +408,14 @@ document.addEventListener("DOMContentLoaded", () => {
         cat.wanderAngle = Math.random() * Math.PI * 2;
       }
 
-      cat.frame = (cat.frame + 0.12) % 4;
+      const moved = Math.hypot(cat.x - previousX, cat.y - previousY);
+      cat.isMoving = moved > 0.05;
+
+      if (cat.isMoving) {
+        cat.frame = (cat.frame + (cat.isRunning ? 0.28 : 0.12)) % 4;
+      } else {
+        cat.frame = 0;
+      }
     }
 
     function update() {
