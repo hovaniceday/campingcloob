@@ -310,10 +310,17 @@ document.addEventListener("DOMContentLoaded", () => {
         baseX: Math.random() * canvas.width,
         baseY: Math.random() * canvas.height,
         phase: Math.random() * Math.PI * 2,
+
+        // slow, fairy-ish drifting
         speed: 0.0012 + Math.random() * 0.002,
         drift: 18 + Math.random() * 28,
+
+        // visible animated 2x2 body
         size: 26 + Math.random() * 10,
-        glowSize: 22 + Math.random() * 24,
+
+        // bigger warmer glow
+        glowSize: 28 + Math.random() * 30,
+
         alpha: 0.42 + Math.random() * 0.3,
         frame: Math.floor(Math.random() * 4),
         frameSpeed: 0.035 + Math.random() * 0.025
@@ -439,21 +446,22 @@ document.addEventListener("DOMContentLoaded", () => {
         fly.glowSize
       );
 
-      gradient.addColorStop(0, `rgba(255, 245, 160, ${0.42 * pulse})`);
-      gradient.addColorStop(0.35, `rgba(210, 255, 150, ${0.18 * pulse})`);
-      gradient.addColorStop(1, "rgba(210, 255, 150, 0)");
+      gradient.addColorStop(0, `rgba(255, 255, 180, ${0.7 * pulse})`);
+      gradient.addColorStop(0.28, `rgba(255, 235, 95, ${0.34 * pulse})`);
+      gradient.addColorStop(0.65, `rgba(190, 255, 140, ${0.12 * pulse})`);
+      gradient.addColorStop(1, "rgba(190, 255, 140, 0)");
 
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.arc(fly.x, fly.y, fly.glowSize, 0, Math.PI * 2);
+      ctx.arc(fly.x, fly.y, fly.glowSize * 1.25, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.globalAlpha = fly.alpha * pulse;
+      ctx.globalAlpha = Math.min(1, fly.alpha * pulse * 1.35);
 
       if (images.firefly) {
         drawSprite2x2(images.firefly, fly.frame, fly.x, fly.y, fly.size);
       } else {
-        ctx.fillStyle = "#fff6a3";
+        ctx.fillStyle = "#fff7a8";
         ctx.fillRect(fly.x - 2, fly.y - 2, 4, 4);
       }
 
@@ -608,7 +616,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const now = performance.now();
 
       fireflies.forEach(fly => {
-        const pulse = 0.55 + Math.sin(now * 0.0012 + fly.phase) * 0.35;
+        const pulse = 0.68 + Math.sin(now * 0.0009 + fly.phase) * 0.32;
         drawFirefly(fly, pulse);
       });
 
