@@ -5,7 +5,7 @@
 body {
   margin: 0;
   overflow: hidden;
-  background: #c7e89a;
+  background: #8faa6a;
   color: white;
   font-family: "Inter", sans-serif;
 }
@@ -33,7 +33,7 @@ canvas {
   height: auto;
   aspect-ratio: 4 / 3;
   display: block;
-  background: #c7e89a;
+  background: #9ab774;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
