@@ -301,22 +301,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const fireflies = [];
-    const fireflyCount = isMobileViewport() ? 8 : 16;
+    const fireflyCount = isMobileViewport() ? 10 : 20;
 
-    if (images.firefly) {
-      for (let i = 0; i < fireflyCount; i++) {
-        fireflies.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          baseX: Math.random() * canvas.width,
-          baseY: Math.random() * canvas.height,
-          phase: Math.random() * Math.PI * 2,
-          speed: 0.006 + Math.random() * 0.006,
-          drift: 18 + Math.random() * 34,
-          size: 12 + Math.random() * 8,
-          alpha: 0.25 + Math.random() * 0.35
-        });
-      }
+    for (let i = 0; i < fireflyCount; i++) {
+      fireflies.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        baseX: Math.random() * canvas.width,
+        baseY: Math.random() * canvas.height,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.004 + Math.random() * 0.006,
+        drift: 22 + Math.random() * 42,
+        size: 18 + Math.random() * 14,
+        glowSize: 18 + Math.random() * 18,
+        alpha: 0.55 + Math.random() * 0.35
+      });
     }
 
     const keys = {};
@@ -426,6 +425,47 @@ document.addEventListener("DOMContentLoaded", () => {
       return true;
     }
 
+    function drawFirefly(fly, pulse) {
+      ctx.save();
+
+      // glow halo
+      const gradient = ctx.createRadialGradient(
+        fly.x,
+        fly.y,
+        0,
+        fly.x,
+        fly.y,
+        fly.glowSize
+      );
+
+      gradient.addColorStop(0, `rgba(255, 255, 100, ${0.55 * pulse})`);
+      gradient.addColorStop(0.35, `rgba(255, 230, 80, ${0.22 * pulse})`);
+      gradient.addColorStop(1, "rgba(255, 230, 80, 0)");
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(fly.x, fly.y, fly.glowSize, 0, Math.PI * 2);
+      ctx.fill();
+
+      // bright center
+      ctx.globalAlpha = fly.alpha * pulse;
+
+      if (images.firefly) {
+        ctx.drawImage(
+          images.firefly,
+          fly.x - fly.size / 2,
+          fly.y - fly.size / 2,
+          fly.size,
+          fly.size
+        );
+      } else {
+        ctx.fillStyle = "#fff46b";
+        ctx.fillRect(fly.x - 2, fly.y - 2, 4, 4);
+      }
+
+      ctx.restore();
+    }
+
     function updatePlayer() {
       if (keys["ArrowUp"] || keys["w"] || keys["up"]) {
         player.y -= player.speed;
@@ -528,8 +568,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateFireflies() {
-      if (!images.firefly) return;
-
       const now = performance.now();
 
       fireflies.forEach(fly => {
@@ -572,24 +610,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      if (images.firefly) {
-        const now = performance.now();
+      const now = performance.now();
 
-        fireflies.forEach(fly => {
-          const pulse = 0.55 + Math.sin(now * 0.004 + fly.phase) * 0.35;
-
-          ctx.save();
-          ctx.globalAlpha = fly.alpha * pulse;
-          ctx.drawImage(
-            images.firefly,
-            fly.x - fly.size / 2,
-            fly.y - fly.size / 2,
-            fly.size,
-            fly.size
-          );
-          ctx.restore();
-        });
-      }
+      fireflies.forEach(fly => {
+        const pulse = 0.6 + Math.sin(now * 0.004 + fly.phase) * 0.4;
+        drawFirefly(fly, pulse);
+      });
 
       places.forEach(place => {
         place.sidebarElement.classList.remove("active");
