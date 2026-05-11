@@ -44,8 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
   ).then(startGame);
 
   function startGame() {
-    let isUnlocked = false;
-
     function isMobileViewport() {
       return window.matchMedia("(max-width: 900px)").matches;
     }
@@ -213,11 +211,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (diff <= 0) {
         countdown.textContent = "Trips are open!";
-        isUnlocked = true;
         return;
       }
-
-      isUnlocked = false;
 
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -292,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     window.setTimeout(() => {
-      showToast("explore quack quack!", 1800);
+      showToast("happy exploring! quack quack!", 1800);
     }, 500);
 
     function respawnCat() {
@@ -722,11 +717,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function openPlace(place) {
-      if (!isUnlocked) {
-        showToast("signups open may 22 at 3pm ET!", 1600);
-        return;
-      }
-
       window.location.href = place.url;
     }
 
