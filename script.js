@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
       {
         name: "Basecamp",
         img: images.camp,
-        url: "https://calendar.google.com/calendar/u/0?cid=YmIzYjY5ZDk2OGE5MDg3NDUxMjJiOTkxZWQ3ZjRkMzdmY2JkNGJjNWQ5ZWRiNGIwOGI2NjYzYWI3NTJhYzRhNEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t",
+        url: "https://docs.google.com/spreadsheets/d/1Ou1Y6CII_Idb5882TLrGZkmHyzh2Zs7niya8VA7Ga8w/edit?gid=1385205414#gid=1385205414",
         gridX: 1,
         gridY: 1,
         offsetX: -10,
@@ -101,8 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
         frame: 0,
         frameSpeed: 0.16,
         size: 92,
-        icon: "calendar",
-        hint: "check out the cloob cal"
+        icon: "calendar-pencil",
+        hint: "check out the cloob cal + signups"
       }
     ];
 
@@ -135,7 +135,23 @@ document.addEventListener("DOMContentLoaded", () => {
     places.forEach(place => {
       const li = document.createElement("li");
 
-      if (place.icon === "calendar") {
+      if (place.icon === "calendar-pencil") {
+        li.innerHTML = `
+          <span class="trip-link-content">
+            <span class="trip-icons" aria-hidden="true">
+              <svg class="trip-icon" viewBox="0 0 24 24">
+                <rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="2"></rect>
+                <path d="M8 3v4M16 3v4M4 10h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+              </svg>
+              <svg class="trip-icon" viewBox="0 0 24 24">
+                <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0 0-3L17.5 5.5a2.1 2.1 0 0 0-3 0L4 16v4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+                <path d="M13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+              </svg>
+            </span>
+            <span>${place.name}</span>
+          </span>
+        `;
+      } else if (place.icon === "calendar") {
         li.innerHTML = `
           <span class="trip-link-content">
             <svg class="trip-icon" viewBox="0 0 24 24" aria-hidden="true">
